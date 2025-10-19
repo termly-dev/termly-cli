@@ -62,13 +62,13 @@ Body: {
 
 ```javascript
 const serverUrl = getServerUrl(); // e.g., wss://api.termly.dev
-const wsUrl = `${serverUrl}/?type=agent&code=${pairingCode}`;
+const wsUrl = `${serverUrl}/ws/agent?code=${pairingCode}`;
 const ws = new WebSocket(wsUrl);
 ```
 
-**Important**: The query parameters are:
-- `type=agent` - identifies this connection as a CLI agent
-- `code=ABC-123` - the pairing code for session identification
+**Important**: The WebSocket connection details:
+- Path: `/ws/agent` - identifies this connection as a CLI agent
+- Query parameter `code=ABC123` - the pairing code for session identification
 
 ### 3. Wait for Pairing Complete
 
