@@ -1,0 +1,25 @@
+# Development files
+.git
+.gitignore
+.DS_Store
+*.log
+
+# Documentation (included in npm package)
+# Remove this line if you want to exclude docs
+# *.md
+
+# Test files
+test/
+*.test.js
+*.spec.js
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Temporary files
+tmp/
+temp/
+.tmp/

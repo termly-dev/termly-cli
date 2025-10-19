@@ -1,0 +1,44 @@
+{
+  "name": "termly-cli",
+  "version": "1.0.0",
+  "description": "Universal terminal access for AI coding assistants",
+  "main": "index.js",
+  "bin": {
+    "termly": "./bin/cli.js"
+  },
+  "scripts": {
+    "start": "node bin/cli.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "terminal",
+    "remote",
+    "ai",
+    "coding",
+    "assistant",
+    "claude",
+    "aider",
+    "copilot",
+    "mobile"
+  ],
+  "author": "Termly Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/termly-dev/termly-cli"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "commander": "^11.0.0",
+    "ws": "^8.14.0",
+    "node-pty": "^1.0.0",
+    "chalk": "^4.1.2",
+    "conf": "^10.2.0",
+    "inquirer": "^8.2.5",
+    "qrcode-terminal": "^0.12.0",
+    "uuid": "^9.0.0",
+    "axios": "^1.6.0"
+  }
+}
