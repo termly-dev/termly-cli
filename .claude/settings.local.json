@@ -4,7 +4,10 @@
       "Bash(chmod:*)",
       "Bash(npm install)",
       "Bash(node:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(TERMLY_ENV=local node bin/cli.js config)"
     ],
     "deny": [],
     "ask": []

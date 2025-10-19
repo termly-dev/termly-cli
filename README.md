@@ -11,38 +11,71 @@ Access your AI coding assistants from any device. Works with Claude Code, Aider,
 - 💻 **Multiple Sessions** - Run multiple AI tools simultaneously
 - 🎯 **Auto-Detection** - Automatically finds installed AI tools
 - ⚡ **Zero-Knowledge Server** - Server never sees your unencrypted data
+- 🌍 **Multiple Environments** - Production, Development, and Local modes
 
 ## Installation
 
+### Production (Stable)
+
 ```bash
+# Via npm (recommended):
+npm install -g @termly-dev/cli
+
 # Via install script:
 curl -fsSL https://get.termly.dev | bash
-
-# Or via npm:
-npm install -g termly-cli
 ```
 
 After installation, the `termly` command is available globally.
 
+### Development (Beta Testing)
+
+For beta testers and development:
+
+```bash
+npm install -g @termly-dev/cli-dev
+```
+
+This installs the `termly-dev` command which connects to the development environment.
+
+## Environments
+
+Termly CLI supports three environments:
+
+| Environment | Package | Command | Server URL | Use Case |
+|------------|---------|---------|------------|----------|
+| **Production** | `@termly-dev/cli` | `termly` | `wss://api.termly.dev` | End users |
+| **Development** | `@termly-dev/cli-dev` | `termly-dev` | `wss://dev-api.termly.dev` | Beta testers |
+| **Local** | Run from source | `TERMLY_ENV=local termly` | `ws://localhost:3000` | Developers only |
+
+**Note:** Server URLs are hardcoded per environment and cannot be changed by users.
+
 ## Quick Start
 
-1. Start in your project (auto-detects AI tools):
+### Production
 
 ```bash
 cd /path/to/your/project
 termly start
 ```
 
-2. Or specify AI tool explicitly:
+### Development
 
 ```bash
-termly start --ai aider
-termly start --ai "claude code"
+cd /path/to/your/project
+termly-dev start
 ```
 
-3. Scan the QR code with your mobile app
+### Local Development
 
-4. Code from anywhere!
+```bash
+# Clone the repo
+git clone https://github.com/termly-dev/termly-cli
+cd termly-cli
+npm install
+
+# Run with local environment
+TERMLY_ENV=local node bin/cli.js start
+```
 
 ## Multiple Sessions
 
@@ -82,13 +115,15 @@ termly list          # Quick list
 
 ## Commands
 
+All commands work the same way in both `termly` (production) and `termly-dev` (development).
+
 ### Setup
 
 ```bash
 termly setup
 ```
 
-Interactive configuration setup.
+Interactive configuration setup (optional - sets default AI tool preference).
 
 ### Start
 
@@ -163,9 +198,11 @@ termly config set <key> <value>  # Set config value
 Examples:
 
 ```bash
-termly config set serverUrl wss://custom.server.com
 termly config set defaultAI aider
+termly config get defaultAI
 ```
+
+**Note:** Server URL is determined by environment and cannot be changed via config.
 
 ### Cleanup
 
@@ -201,6 +238,12 @@ termly status       # Find session ID
 termly stop abc-123 # Stop it
 ```
 
+**Check your environment:**
+
+```bash
+termly config  # Shows current environment and server URL
+```
+
 **Logs:** `~/.termly/logs/cli.log`
 
 For issues: https://github.com/termly-dev/termly-cli/issues
@@ -211,25 +254,8 @@ For issues: https://github.com/termly-dev/termly-cli/issues
 - **Diffie-Hellman** key exchange (2048-bit)
 - **Zero-knowledge server** - Server cannot decrypt your data
 - **One mobile device per session**
+- **Environment isolation** - Production and development separated
 - **Open source** - Audit the code yourself
-
-## Project Structure
-
-```
-termly-cli/
-├── bin/
-│   └── cli.js                 # Main entry point
-├── lib/
-│   ├── commands/              # CLI commands
-│   ├── ai-tools/              # AI tool management
-│   ├── session/               # Session management
-│   ├── network/               # WebSocket & reconnection
-│   ├── crypto/                # Encryption (DH + AES)
-│   ├── utils/                 # Utilities
-│   └── config/                # Configuration
-├── package.json
-└── README.md
-```
 
 ## Development
 
@@ -237,11 +263,34 @@ termly-cli/
 # Install dependencies
 npm install
 
-# Run locally
+# Run production mode
 node bin/cli.js start
+
+# Run development mode
+node bin/cli-dev.js start
+
+# Run local mode (custom server)
+TERMLY_ENV=local node bin/cli.js start
 
 # Debug mode
 DEBUG=1 node bin/cli.js start --debug
+```
+
+## Publishing
+
+### Production Release
+
+```bash
+npm publish
+```
+
+### Development Release
+
+```bash
+# Temporarily swap package files
+cp package.dev.json package.json
+npm publish
+git checkout package.json
 ```
 
 ## License
@@ -251,6 +300,7 @@ MIT
 ## Links
 
 - Website: https://termly.dev
+- Development: https://dev.termly.dev
 - Documentation: https://termly.dev/docs
 - GitHub: https://github.com/termly-dev/termly-cli
 - Issues: https://github.com/termly-dev/termly-cli/issues

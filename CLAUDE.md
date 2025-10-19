@@ -13,22 +13,40 @@ Termly CLI is a universal NPM utility that enables remote terminal access to AI 
 
 **Key constraint:** Each CLI session supports exactly ONE mobile device connection.
 
+## Multi-Environment Architecture
+
+The CLI supports three environments with **hardcoded server URLs**:
+
+- **Production** (`@termly-dev/cli`): `termly` command → `wss://api.termly.dev`
+- **Development** (`@termly-dev/cli-dev`): `termly-dev` command → `wss://dev-api.termly.dev`
+- **Local**: `TERMLY_ENV=local` → `ws://localhost:3000`
+
+Environments are detected by:
+1. `TERMLY_ENV=local` environment variable (highest priority)
+2. Binary name (`cli-dev.js` = dev, `cli.js` = production)
+3. Default to production
+
+**Critical:** Users CANNOT change server URLs. They are immutable per environment.
+
 ## Development Commands
 
 ```bash
 # Install dependencies
 npm install
 
-# Run CLI locally (without global install)
+# Test production package
 node bin/cli.js [command]
+node bin/cli.js config  # Should show "Production" environment
 
-# Link for global development use
-npm link
+# Test development package
+node bin/cli-dev.js [command]
+node bin/cli-dev.js config  # Should show "Development" environment
 
-# Test specific commands
-node bin/cli.js tools list
-node bin/cli.js status
-node bin/cli.js --help
+# Test local environment
+TERMLY_ENV=local node bin/cli.js config  # Should show "Local Development"
+
+# Link for global testing
+npm link  # Creates 'termly' command
 
 # Debug mode (enables verbose logging)
 DEBUG=1 node bin/cli.js start --debug
@@ -39,6 +57,18 @@ tail -f ~/.termly/logs/cli.log
 
 # Clean up test sessions
 rm -rf ~/.termly
+```
+
+## Publishing
+
+```bash
+# Publish production package
+npm publish
+
+# Publish development package
+cp package.dev.json package.json
+npm publish
+git checkout package.json  # Restore original
 ```
 
 ## Architecture
@@ -120,8 +150,12 @@ rm -rf ~/.termly
 ## Configuration & Storage
 
 **Config file:** `~/.termly/config.json` (managed by `conf` library v10.2.0)
-- Schema: serverUrl, defaultAI, version, lastUpdated
+- Schema: defaultAI, version, lastUpdated (serverUrl removed - now hardcoded per environment)
 - Important: Use conf v10.x (v11+ is ESM-only, incompatible with CommonJS)
+
+**Environment detection:** `lib/config/environment.js`
+- Exports: getServerUrl(), getApiUrl(), getEnvironmentName(), isLocal(), isDev(), isProduction()
+- Determines environment at runtime (cannot be changed by users)
 
 **Sessions file:** `~/.termly/sessions.json`
 - Array of session objects
@@ -209,3 +243,7 @@ Edit `lib/ai-tools/registry.js`:
 **PTY problems:** `lib/session/pty-manager.js` (spawning/IO) + `lib/session/buffer.js` (buffering)
 
 **Configuration changes:** `lib/config/manager.js` (schema must match conf requirements)
+
+**Environment changes:** `lib/config/environment.js` (add new environments or modify URLs here)
+
+**New environment setup:** Edit `lib/config/environment.js` ENVIRONMENTS object, then create corresponding package file (e.g., `package.staging.json`) and binary (`bin/cli-staging.js`)
