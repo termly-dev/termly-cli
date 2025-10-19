@@ -21,7 +21,7 @@ This document describes the complete communication protocol implementation for t
 - **Zero-Knowledge E2EE**: Server acts as a relay and never decrypts message content
 - **WebSocket Communication**: Real-time bidirectional messaging via WebSocket
 - **Session-based**: Each CLI agent creates a unique session
-- **Public Key Exchange**: Diffie-Hellman 2048-bit key exchange for E2EE setup
+- **Public Key Exchange**: Diffie-Hellman using RFC 3526 Group 14 (2048-bit MODP) for E2EE setup
 - **AES-256-GCM Encryption**: All terminal data encrypted end-to-end
 
 ### Key Principles
