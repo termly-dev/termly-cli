@@ -9,7 +9,11 @@
       "Bash(git push:*)",
       "Bash(TERMLY_ENV=local node bin/cli.js config)",
       "Read(//Users/siarheipratasavitski/Projects/Termly/termly-dev/termly-be/**)",
-      "Bash(git checkout:*)"
+      "Bash(git checkout:*)",
+      "Read(//Users/siarheipratasavitski/Projects/Termly/termly-dev/termly-ios/**)",
+      "Bash(git tag:*)",
+      "Bash(git stash:*)",
+      "Bash(git pull:*)"
     ],
     "deny": [],
     "ask": []
