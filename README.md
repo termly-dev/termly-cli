@@ -18,11 +18,7 @@ Access your AI coding assistants from any device. Works with Claude Code, Aider,
 ### Production (Stable)
 
 ```bash
-# Via npm (recommended):
 npm install -g @termly-dev/cli
-
-# Via install script:
-curl -fsSL https://get.termly.dev | bash
 ```
 
 After installation, the `termly` command is available globally.
