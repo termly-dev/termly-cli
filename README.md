@@ -1,6 +1,6 @@
 # Termly CLI
 
-Access your AI coding assistants from any device. Works with Claude Code, Aider, GitHub Copilot, Cursor, and any terminal-based AI tool.
+Access your AI coding assistants from any device. Works with Claude Code, Aider, GitHub Copilot, and any terminal-based AI tool.
 
 ## Features
 
