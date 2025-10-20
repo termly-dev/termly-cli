@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Termly CLI is a universal NPM utility that enables remote terminal access to AI coding assistants (Claude Code, Aider, GitHub Copilot, Cursor, Cody, etc.) from mobile devices. It works by:
+Termly CLI is a universal NPM utility that enables remote terminal access to AI coding assistants (Claude Code, Aider, GitHub Copilot, Gemini, Grok, Cody, and 10+ more) from mobile devices. It works by:
 
 1. Spawning AI tools in a PTY (pseudo-terminal) on the developer's computer
 2. Streaming terminal I/O through WebSocket to a server with end-to-end encryption
@@ -133,7 +133,7 @@ git checkout package.json  # Restore original
 
 **Registry (`lib/ai-tools/registry.js`):**
 - Defines all supported tools with `command`, `args`, `checkInstalled()`
-- Tools: claude-code, aider, github-copilot, cursor, cody
+- Tools: claude-code, aider, codex, github-copilot, gemini, grok, and 10+ more (see lib/ai-tools/registry.js)
 
 **Auto-Detection (`lib/ai-tools/detector.js`):**
 - Runs `command -v <tool>` for each registered tool
