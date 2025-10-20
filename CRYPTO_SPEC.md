@@ -273,6 +273,81 @@ func decrypt(ciphertext: Data, iv: Data, key: SymmetricKey) throws -> String {
 
 ---
 
+## Fingerprint Verification
+
+To prevent man-in-the-middle attacks, both CLI and mobile clients display a fingerprint of the public key for manual verification.
+
+### Parameters
+
+- **Algorithm**: SHA-256
+- **Input**: CLI's DH public key (raw bytes, same as transmitted)
+- **Output**: First 24 hex characters (12 bytes) formatted with colons
+
+### Node.js Implementation
+
+```javascript
+const crypto = require('crypto');
+
+function generateFingerprint(publicKeyBase64) {
+  const hash = crypto.createHash('sha256')
+    .update(Buffer.from(publicKeyBase64, 'base64'))
+    .digest('hex');
+
+  // Take first 24 characters (12 bytes) and format with colons
+  return hash
+    .substring(0, 24)
+    .match(/.{2}/g)
+    .join(':')
+    .toUpperCase();
+}
+```
+
+### Example Output
+
+```
+A3:B2:C1:D4:E5:F6:12:34:56:78:9A:BC
+```
+
+### iOS/Android Implementation
+
+```swift
+// iOS
+import CryptoKit
+
+func generateFingerprint(publicKey: Data) -> String {
+    let hash = SHA256.hash(data: publicKey)
+    let hexString = hash.prefix(12)
+        .map { String(format: "%02X", $0) }
+        .joined(separator: ":")
+    return hexString
+}
+```
+
+```kotlin
+// Android
+import java.security.MessageDigest
+
+fun generateFingerprint(publicKey: ByteArray): String {
+    val digest = MessageDigest.getInstance("SHA-256")
+    val hash = digest.digest(publicKey)
+
+    return hash.take(12)
+        .joinToString(":") { "%02X".format(it) }
+}
+```
+
+### Verification Process
+
+1. **CLI displays fingerprint** after generating DH keypair
+2. **Mobile receives CLI's public key** via `pairing_complete` event
+3. **Mobile computes fingerprint** from received public key
+4. **Mobile displays fingerprint** in UI
+5. **User manually verifies** both fingerprints match
+
+**Security Note**: If fingerprints don't match, reject the connection - it may indicate a MITM attack.
+
+---
+
 ## Public Key Format
 
 Public keys are transmitted as **base64-encoded** raw bytes.
@@ -370,5 +445,5 @@ Ciphertext + Tag should match on both platforms.
 
 ---
 
-**Last Updated**: 2025-10-19
-**Version**: 1.0
+**Last Updated**: 2025-10-20
+**Version**: 1.1

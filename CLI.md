@@ -87,11 +87,16 @@ termly start --ai-args "--model gpt-4"    # дополнительные арг�
 
 **Шаги выполнения:**
 
-**Шаг 1: Pre-flight Checks**
+**Шаг 1: Version Check**
+- Проверить версию CLI против минимальной требуемой версии на сервере
+- Если версия устарела → показать ошибку с командой обновления и завершить
+- Если сетевая ошибка → пропустить проверку (не блокировать пользователя)
+
+**Шаг 2: Pre-flight Checks**
 - Определить workingDir (argument || process.cwd())
 - Определить projectName (path.basename(workingDir))
 
-**Шаг 2: Check for Existing Session in Directory**
+**Шаг 3: Check for Existing Session in Directory**
 ````javascript
 const sessions = loadSessionsRegistry();
 const existingInDir = sessions.find(
@@ -111,7 +116,7 @@ if (existingInDir) {
 }
 ````
 
-**Шаг 3: AI Tool Selection**
+**Шаг 4: AI Tool Selection**
 
 **Auto-Detection Mode (default):**
 ````
@@ -556,11 +561,18 @@ termly list
 **Output:**
 ````
 2 active sessions:
-  • abc-123  frontend  Claude Code  🟢 (iPhone)
+
+  • abc-123  frontend  Claude Code  🟢 (Mobile connected)
+    Fingerprint: A3:B2:C1:D4:E5:F6:12:34:56:78:9A:BC
   • xyz-789  backend   Aider        🔴
 
 Use 'termly status' for details.
 ````
+
+**Features:**
+- Shows encryption fingerprint for verification with mobile app
+- Mobile connection status indicator (🟢/🔴)
+- Fingerprint displayed only after encryption is established
 
 ---
 

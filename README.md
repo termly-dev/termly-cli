@@ -6,12 +6,13 @@ Access your AI coding assistants from any device. Works with Claude Code, Aider,
 
 - 🚀 **Universal AI Tool Support** - Works with any terminal-based AI coding assistant
 - 📱 **Mobile Access** - Control your AI tools from phone or tablet
-- 🔒 **End-to-End Encryption** - AES-256-GCM + DH-2048 key exchange
+- 🔒 **End-to-End Encryption** - AES-256-GCM + DH-2048 key exchange with fingerprint verification
 - 🔄 **Session Resume** - Automatic reconnection with state synchronization
 - 💻 **Multiple Sessions** - Run multiple AI tools simultaneously
 - 🎯 **Auto-Detection** - Automatically finds installed AI tools
 - ⚡ **Zero-Knowledge Server** - Server never sees your unencrypted data
 - 🌍 **Multiple Environments** - Production, Development, and Local modes
+- 🔄 **Auto-Update Check** - Ensures you're always running a supported version
 
 ## Installation
 
@@ -193,7 +194,7 @@ Stop one or all sessions.
 termly list
 ```
 
-Quick list of active sessions.
+Quick list of active sessions with encryption fingerprints for verification.
 
 ### Tools
 
@@ -268,9 +269,11 @@ For issues: https://github.com/termly-dev/termly-cli/issues
 
 - **End-to-end encryption** (AES-256-GCM)
 - **Diffie-Hellman** key exchange (2048-bit)
+- **Fingerprint verification** - Compare encryption keys between CLI and mobile app
 - **Zero-knowledge server** - Server cannot decrypt your data
 - **One mobile device per session**
 - **Environment isolation** - Production and development separated
+- **Version enforcement** - Automatic check for minimum supported version
 - **Open source** - Audit the code yourself
 
 ## Development

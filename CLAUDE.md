@@ -76,25 +76,27 @@ git checkout package.json  # Restore original
 ### Core Data Flow
 
 **Start Command Flow:**
-1. `start.js` → validates directory, checks for existing session
-2. `ai-tools/selector.js` → auto-detects or selects AI tool
-3. `crypto/dh.js` → generates DH keypair for E2EE
-4. Generates pairing code (ABC-123 format) + QR code
-5. `session/registry.js` → registers session to `~/.termly/sessions.json`
-6. `network/websocket.js` → connects to `wss://api.termly.dev/ws/agent?code=ABC123`
-7. On pairing complete: computes shared secret → derives AES-256 key
-8. `session/pty-manager.js` → spawns AI tool via node-pty
-9. Bidirectional streaming begins:
+1. `utils/version-checker.js` → checks CLI version against server minimum (blocks if outdated)
+2. `start.js` → validates directory, checks for existing session
+3. `ai-tools/selector.js` → auto-detects or selects AI tool
+4. `crypto/dh.js` → generates DH keypair for E2EE
+5. Generates pairing code (ABC123 format, displayed as ABC-123) + QR code
+6. `session/registry.js` → registers session to `~/.termly/sessions.json`
+7. `network/websocket.js` → connects to `wss://api.termly.dev/ws/agent?code=ABC123`
+8. On pairing complete: computes shared secret → derives AES-256 key → generates fingerprint
+9. `session/pty-manager.js` → spawns AI tool via node-pty
+10. Bidirectional streaming begins:
    - PTY output → CircularBuffer → encrypt → WebSocket → mobile
    - Mobile input → WebSocket → decrypt → PTY
 
 ### Session State Management
 
 **Sessions Registry (`~/.termly/sessions.json`):**
-- Stores all session metadata (sessionId, PID, workingDir, aiTool, etc.)
+- Stores all session metadata (sessionId, PID, workingDir, aiTool, fingerprint, mobileConnected, etc.)
 - Status values: `running`, `stopped`, `stale`
 - Auto-validates PIDs on load (marks dead processes as `stale`)
 - Prevents duplicate sessions per directory
+- Fingerprint stored after encryption established for verification
 
 **Circular Buffer:**
 - Stores last 100KB of PTY output in memory
@@ -195,15 +197,17 @@ Message types to mobile:
 - `sync_complete` → catchup finished
 
 ### Pairing Code Format
-- 6 chars: `[A-Z0-9]{3}-[A-Z0-9]{3}` (e.g., ABC-123)
-- Generated randomly
+- 6 chars: `[A-Z0-9]{6}` (e.g., ABC123)
+- Generated randomly without dash
+- Displayed with dash for readability: ABC-123 (formatting only)
 - Included in QR code JSON: `{type, code, serverUrl, aiTool, projectName}`
 - Sent to server at `/api/pairing` endpoint
 
 ### Error Handling Patterns
+- Outdated CLI version: Block start with update command from server
 - AI tool not found: Show installation instructions specific to tool
 - Session exists in dir: Show session info + suggest `termly stop`
-- Network error: Auto-reconnect with backoff
+- Network error: Auto-reconnect with backoff (version check skipped on network error)
 - PTY crash: Log exit code, update session status
 - Stale sessions: Detected by PID check, removable via `cleanup`
 
@@ -245,5 +249,7 @@ Edit `lib/ai-tools/registry.js`:
 **Configuration changes:** `lib/config/manager.js` (schema must match conf requirements)
 
 **Environment changes:** `lib/config/environment.js` (add new environments or modify URLs here)
+
+**Version checking:** `lib/utils/version-checker.js` (CLI version validation logic)
 
 **New environment setup:** Edit `lib/config/environment.js` ENVIRONMENTS object, then create corresponding package file (e.g., `package.staging.json`) and binary (`bin/cli-staging.js`)
