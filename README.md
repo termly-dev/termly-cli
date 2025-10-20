@@ -1,6 +1,6 @@
 # Termly CLI
 
-Access your AI coding assistants from any device. Works with Claude Code, Aider, GitHub Copilot, Cursor, and any terminal-based AI tool.
+Access your AI coding assistants from any device. Works with Claude Code, Aider, GitHub Copilot, and any terminal-based AI tool.
 
 ## Features
 
@@ -18,11 +18,7 @@ Access your AI coding assistants from any device. Works with Claude Code, Aider,
 ### Production (Stable)
 
 ```bash
-# Via npm (recommended):
 npm install -g @termly-dev/cli
-
-# Via install script:
-curl -fsSL https://get.termly.dev | bash
 ```
 
 After installation, the `termly` command is available globally.
@@ -106,12 +102,32 @@ termly list          # Quick list
 
 ## Supported AI Tools
 
-- **Claude Code** - Anthropic's AI coding assistant
-- **Aider** - AI pair programming in your terminal
-- **GitHub Copilot CLI** - GitHub's command line AI
-- **Cursor** - AI-first code editor
-- **Cody** - Sourcegraph's AI assistant
-- **And more...** - Works with any terminal-based tool
+Termly CLI supports **17 interactive terminal-based AI coding assistants**:
+
+### Official Tools from Major Companies
+- **Claude Code** (Anthropic) - AI coding assistant
+- **OpenAI Codex CLI** (OpenAI) - Official Codex CLI (April 2025)
+- **Google Gemini CLI** (Google) - 1M token context
+- **GitHub Copilot CLI** (Microsoft) - Command line AI
+- **Cody CLI** (Sourcegraph) - AI assistant (Beta)
+- **Amazon Q Developer** (AWS) - Free tier available
+- **Grok CLI** (xAI/Elon Musk) - Grok AI assistant
+
+### Popular Open-Source Tools
+- **Aider** - AI pair programming (35k+ stars)
+- **Continue CLI** - Modular architecture
+- **OpenHands** - Open-source Devin alternative
+- **OpenCode** - Terminal-native (26k+ stars)
+- **Mentat** - Git integration
+- **Cursor Agent** - From Cursor ecosystem
+
+### Specialized Tools
+- **ChatGPT CLI** - ChatGPT in terminal
+- **ShellGPT** - Shell command assistant
+- **Ollama** - Run LLMs locally (CodeLlama, etc)
+- **Blackbox AI** - Debugging & file editing
+
+**And more...** - Works with any terminal-based AI tool
 
 ## Commands
 
