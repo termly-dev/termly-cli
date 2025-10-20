@@ -1,6 +1,6 @@
 {
   "name": "@termly-dev/cli",
-  "version": "0.0.2",
+  "version": "0.3.0",
   "description": "Universal terminal access for AI coding assistants",
   "main": "index.js",
   "bin": {
@@ -31,14 +31,15 @@
     "node": ">=18.0.0"
   },
   "dependencies": {
-    "commander": "^11.0.0",
-    "ws": "^8.14.0",
-    "node-pty": "^1.0.0",
+    "axios": "^1.6.0",
     "chalk": "^4.1.2",
+    "commander": "^11.0.0",
     "conf": "^10.2.0",
     "inquirer": "^8.2.5",
+    "node-pty": "^1.0.0",
     "qrcode-terminal": "^0.12.0",
+    "semver": "^7.7.3",
     "uuid": "^9.0.0",
-    "axios": "^1.6.0"
+    "ws": "^8.14.0"
   }
 }
