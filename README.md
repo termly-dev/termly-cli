@@ -81,12 +81,16 @@ apk add --no-cache make gcc g++ python3
 ```
 
 #### Windows
-Windows x64 usually works out-of-the-box if you have Visual Studio installed. If not:
+The installer **automatically checks** for required build tools before installation. If any components are missing, installation will be blocked with clear instructions.
 
 **Required components:**
 - Visual Studio 2022 (Community/Professional/Enterprise) OR Build Tools for Visual Studio 2022
+- MSVC C++ compiler (cl.exe)
+- MSVC Spectre-mitigated libraries
+- Windows SDK (10 or 11)
 - Python 3.x
-- Windows SDK
+
+**The installer verifies all components and will show detailed error messages if anything is missing.**
 
 **Installation steps:**
 
@@ -96,8 +100,8 @@ Windows x64 usually works out-of-the-box if you have Visual Studio installed. If
 2. Run installer and select workload: **Desktop development with C++**
 3. In **Individual Components** tab, ensure checked:
    - ✅ MSVC v143 - VS 2022 C++ x64/x86 build tools
-   - ✅ **MSVC v143 - VS 2022 C++ x64/x86 Spectre-mitigated libs** (important!)
-   - ✅ Windows SDK (latest version)
+   - ✅ **MSVC v143 - VS 2022 C++ x64/x86 Spectre-mitigated libs** (required!)
+   - ✅ **Windows 11 SDK** or Windows 10 SDK (required!)
    - ✅ C++ CMake tools for Windows
 4. Install (requires ~7GB disk space)
 5. After installation: `npm install -g @termly-dev/cli`
@@ -106,25 +110,30 @@ Windows x64 usually works out-of-the-box if you have Visual Studio installed. If
 
 1. Download [Build Tools for Visual Studio 2022](https://aka.ms/vs/17/release/vs_BuildTools.exe)
 2. Run installer and select: **Desktop development with C++**
-3. Ensure **Spectre-mitigated libraries** component is checked
+3. In **Individual Components** tab, ensure checked:
+   - ✅ MSVC v143 - VS 2022 C++ x64/x86 Spectre-mitigated libs
+   - ✅ **Windows 11 SDK** or Windows 10 SDK
 4. Install (~3GB disk space)
 5. Install Python: Download from [python.org](https://www.python.org/downloads/)
 6. After installation: `npm install -g @termly-dev/cli`
 
-**If you already have Visual Studio but installation fails:**
+**Common installation errors:**
 
-Error: `Spectre-mitigated libraries are required`
+The installer will block and show specific instructions if components are missing:
 
-Solution:
-1. Open **Visual Studio Installer**
-2. Click **Modify** on your VS 2022 installation
-3. Go to **Individual Components** tab
-4. Search: "Spectre"
-5. Check: ✅ **MSVC v143 - VS 2022 C++ x64/x86 Spectre-mitigated libs (Latest)**
-6. Click **Modify** to install
-7. Retry: `npm install -g @termly-dev/cli`
+**"Missing: C++ build tools"**
+- Open Visual Studio Installer → Modify → Workloads tab
+- Check: "Desktop development with C++"
 
-**Note:** Prebuilt binaries for `node-pty` may be available for Windows x64, in which case build tools aren't needed. The installer will try prebuilt first.
+**"Missing: Spectre-mitigated libraries"**
+- Open Visual Studio Installer → Modify → Individual Components tab
+- Search "Spectre" and check: "MSVC v143 - VS 2022 C++ x64/x86 Spectre-mitigated libs (Latest)"
+
+**"Missing: Windows SDK"**
+- Open Visual Studio Installer → Modify → Individual Components tab
+- Search "Windows SDK" and check: "Windows 11 SDK (10.0.22621.0)" or any available version
+
+After fixing missing components, retry: `npm install -g @termly-dev/cli`
 
 #### macOS
 Works out-of-the-box. Xcode Command Line Tools usually installed automatically.
@@ -353,9 +362,18 @@ Remove stale sessions (processes that are no longer running).
 
 ### Installation Issues
 
-**Linux: "Error: not found: make" or "gyp ERR! build error"**
+**Automatic Build Tools Check**
 
-Install build tools:
+The installer automatically verifies build requirements on all platforms:
+- **Linux**: Checks for make, gcc/g++, python3
+- **Windows**: Checks for MSVC compiler, Spectre libs, Windows SDK, Python
+- **macOS**: Checks for Xcode Command Line Tools (warning only)
+
+If components are missing, installation will be **blocked** with detailed instructions.
+
+**Linux: Installation blocked - missing build tools**
+
+The installer detected missing components. Install them:
 ```bash
 # Amazon Linux / RHEL / CentOS
 sudo yum install gcc-c++ make python3 -y
@@ -364,17 +382,19 @@ sudo yum install gcc-c++ make python3 -y
 sudo apt-get install build-essential python3 -y
 ```
 
-**Windows: "Spectre-mitigated libraries are required"**
+Then retry: `npm install -g @termly-dev/cli`
 
-Install missing component:
-1. Open **Visual Studio Installer**
-2. Click **Modify** on VS 2022
-3. Go to **Individual Components** tab
-4. Search "Spectre" and check: **MSVC v143 - VS 2022 C++ x64/x86 Spectre-mitigated libs (Latest)**
-5. Click **Modify** to install
-6. Retry installation
+**Windows: Installation blocked - missing components**
 
-See [Windows requirements](#windows) section for full Visual Studio setup.
+The installer will show exactly what's missing and how to fix it.
+
+Common fixes:
+- **Missing C++ build tools**: Install "Desktop development with C++" workload
+- **Missing Spectre libraries**: Add "MSVC v143 Spectre-mitigated libs" in Individual Components
+- **Missing Windows SDK**: Add "Windows 11 SDK" in Individual Components
+- **Missing Python**: Download from [python.org](https://www.python.org/downloads/)
+
+See detailed instructions in the error message or [Windows requirements](#windows) section.
 
 **Windows: "EPERM: operation not permitted" during cleanup**
 

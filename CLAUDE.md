@@ -71,9 +71,70 @@ npm publish
 git checkout package.json  # Restore original
 ```
 
+## Build Tools Verification
+
+The CLI includes a **preinstall** script (`scripts/check-build-tools.js`) that validates build requirements before npm installs dependencies. This prevents cryptic node-gyp errors by checking upfront.
+
+### What It Checks
+
+**Linux:**
+- `make` command availability
+- `gcc`/`g++` compiler availability
+- `python3` or `python` availability
+- **Blocks installation** if any missing (exit code 1)
+
+**Windows:**
+- Visual Studio 2022/2019 installation (Community/Professional/Enterprise/BuildTools)
+- **MSVC compiler** (`cl.exe`) - verifies actual compiler binary exists, not just folders
+- **Spectre-mitigated libraries** - checks for files in `lib/spectre/{x64,x86,arm64}` folders
+- **Windows SDK** - verifies SDK in `C:\Program Files (x86)\Windows Kits\10\Include\`
+- Python availability
+- **Blocks installation** if any missing (exit code 1)
+
+**macOS:**
+- Xcode Command Line Tools (`xcode-select -p`)
+- **Warning only** - doesn't block (prebuilt binaries usually available)
+
+### Implementation Details
+
+**File:** `scripts/check-build-tools.js`
+
+**Key functions:**
+- `checkVisualStudio()` - Scans VS installation paths, verifies MSVC toolset by checking for `cl.exe` compiler binary
+- `checkSpectreLibs()` - Verifies Spectre-mitigated libraries exist and contain files
+- `checkWindowsSDK()` - Checks for Windows SDK in standard installation locations
+- `checkLinux()` - Uses `commandExists()` to verify make/gcc/python
+- `checkMacOS()` - Checks Xcode CLI tools, shows warning if missing but continues
+
+**Output:** All messages use `console.error()` (stderr) because npm suppresses stdout for preinstall scripts.
+
+**Debug mode:** Set `DEBUG=1` environment variable to see detailed path checking logs.
+
+### Testing Build Checks
+
+Standalone test scripts available (not published to npm):
+```bash
+# Test Visual Studio/MSVC detection (Windows)
+node test-windows-build-tools.js
+
+# Test Spectre libs and Windows SDK (Windows)
+node test-spectre-sdk.js
+```
+
+These scripts provide detailed output about what's found/missing without running npm install.
+
 ## Architecture
 
 ### Core Data Flow
+
+**Installation Flow:**
+1. User runs `npm install -g @termly-dev/cli` (or cli-dev)
+2. **Preinstall script** (`scripts/check-build-tools.js`) runs FIRST
+   - Checks platform-specific build requirements
+   - Blocks installation with detailed instructions if components missing
+   - Exits with code 1 to prevent npm from continuing
+3. If checks pass, npm proceeds with dependency installation
+4. `node-pty` compiles successfully because all required tools are present
 
 **Start Command Flow:**
 1. `utils/version-checker.js` → checks CLI version against server minimum (blocks if outdated)
