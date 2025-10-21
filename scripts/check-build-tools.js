@@ -232,6 +232,33 @@ function checkSpectreLibs() {
   return false;
 }
 
+function checkWindowsSDK() {
+  // Check for Windows SDK
+  const fs = require('fs');
+  const path = require('path');
+
+  const sdkPaths = [
+    'C:\\Program Files (x86)\\Windows Kits\\10',
+    'C:\\Program Files\\Windows Kits\\10'
+  ];
+
+  for (const sdkBase of sdkPaths) {
+    if (!fs.existsSync(sdkBase)) continue;
+
+    const includePath = path.join(sdkBase, 'Include');
+    if (fs.existsSync(includePath)) {
+      try {
+        const versions = fs.readdirSync(includePath).filter(v => v.match(/^10\./));
+        if (versions.length > 0) {
+          return true; // Found Windows SDK
+        }
+      } catch {}
+    }
+  }
+
+  return false;
+}
+
 function getWindowsArch() {
   // Detect Windows architecture
   const arch = process.arch;
@@ -245,10 +272,11 @@ function checkWindows(packageName) {
   const vsCheck = checkVisualStudio();
   const hasPython = commandExists('python') || commandExists('python3');
   const hasSpectre = vsCheck.msvcInstalled ? checkSpectreLibs() : false;
+  const hasSDK = checkWindowsSDK();
   const arch = getWindowsArch();
 
   // If ANY check fails - show full instructions and block
-  if (!vsCheck.msvcInstalled || !hasPython || !hasSpectre) {
+  if (!vsCheck.msvcInstalled || !hasPython || !hasSpectre || !hasSDK) {
     console.error('\n\n');
     console.error(colorize('╔════════════════════════════════════════════════════════════════╗', COLORS.red));
     console.error(colorize('║  ❌ INSTALLATION BLOCKED - Missing Build Tools                 ║', COLORS.red));
@@ -265,6 +293,7 @@ function checkWindows(packageName) {
 
     if (!hasPython) console.error(colorize('  ✗ Python 3.x', COLORS.red));
     if (vsCheck.msvcInstalled && !hasSpectre) console.error(colorize('  ✗ Spectre-mitigated libraries', COLORS.red));
+    if (!hasSDK) console.error(colorize('  ✗ Windows SDK', COLORS.red));
 
     console.error('\n' + colorize('═══════════════════════════════════════════════════════════════', COLORS.cyan));
     console.error(colorize('SETUP INSTRUCTIONS:', COLORS.bold));
@@ -312,8 +341,10 @@ function checkWindows(packageName) {
   // All checks passed
   console.error('\n' + colorize('✓ Windows Build Tools Check Passed', COLORS.cyan));
   console.error(colorize('  ✓ Visual Studio found', COLORS.cyan));
-  console.error(colorize('  ✓ Python found', COLORS.cyan));
+  console.error(colorize('  ✓ MSVC compiler found', COLORS.cyan));
   console.error(colorize('  ✓ Spectre-mitigated libraries found', COLORS.cyan));
+  console.error(colorize('  ✓ Windows SDK found', COLORS.cyan));
+  console.error(colorize('  ✓ Python found', COLORS.cyan));
   console.error('');
 }
 
