@@ -16,11 +16,32 @@ Access your AI coding assistants from any device. Works with Claude Code, Aider,
 
 ## Installation
 
-### Production (Stable)
+### Quick Install
 
+**macOS:**
 ```bash
 npm install -g @termly-dev/cli
 ```
+
+**Linux:**
+```bash
+# Install build tools first (required for node-pty compilation)
+# Amazon Linux / RHEL / CentOS / Fedora
+sudo yum install gcc-c++ make python3 -y
+
+# Ubuntu / Debian
+sudo apt-get update && sudo apt-get install -y build-essential python3
+
+# Then install CLI
+npm install -g @termly-dev/cli
+```
+
+**Windows:**
+```cmd
+npm install -g @termly-dev/cli
+```
+
+If installation fails, see [Windows requirements](#windows) below.
 
 After installation, the `termly` command is available globally.
 
@@ -33,6 +54,107 @@ npm install -g @termly-dev/cli-dev
 ```
 
 This installs the `termly-dev` command which connects to the development environment.
+
+### System Requirements
+
+Termly CLI requires **build tools** for compiling native dependencies (`node-pty`):
+
+#### Linux
+Build tools are **required** for installation:
+
+**Amazon Linux 2023 / RHEL / CentOS / Fedora:**
+```bash
+sudo yum groupinstall "Development Tools" -y
+# Or minimal:
+sudo yum install gcc-c++ make python3 -y
+```
+
+**Ubuntu / Debian:**
+```bash
+sudo apt-get update
+sudo apt-get install -y build-essential python3
+```
+
+**Alpine Linux:**
+```bash
+apk add --no-cache make gcc g++ python3
+```
+
+#### Windows
+The installer **automatically checks** for required build tools before installation. If any components are missing, installation will be blocked with clear instructions.
+
+**Required components:**
+- Visual Studio 2022 (Community/Professional/Enterprise) OR Build Tools for Visual Studio 2022
+- MSVC C++ compiler (cl.exe)
+- MSVC Spectre-mitigated libraries
+- Windows SDK (10 or 11)
+- Python 3.x
+
+**The installer verifies all components and will show detailed error messages if anything is missing.**
+
+**Installation steps:**
+
+**Option 1 - Visual Studio 2022 Community (Recommended):**
+
+1. Download [Visual Studio 2022 Community](https://visualstudio.microsoft.com/downloads/) (free)
+2. Run installer and select workload: **Desktop development with C++**
+3. In **Individual Components** tab, ensure checked:
+   - ✅ MSVC v143 - VS 2022 C++ x64/x86 build tools
+   - ✅ **MSVC v143 - VS 2022 C++ x64/x86 Spectre-mitigated libs** (required!)
+   - ✅ **Windows 11 SDK** or Windows 10 SDK (required!)
+   - ✅ C++ CMake tools for Windows
+4. Install (requires ~7GB disk space)
+5. After installation: `npm install -g @termly-dev/cli`
+
+**Option 2 - Build Tools Only (Minimal):**
+
+1. Download [Build Tools for Visual Studio 2022](https://aka.ms/vs/17/release/vs_BuildTools.exe)
+2. Run installer and select: **Desktop development with C++**
+3. In **Individual Components** tab, ensure checked:
+   - ✅ MSVC v143 - VS 2022 C++ x64/x86 Spectre-mitigated libs
+   - ✅ **Windows 11 SDK** or Windows 10 SDK
+4. Install (~3GB disk space)
+5. Install Python: Download from [python.org](https://www.python.org/downloads/)
+6. After installation: `npm install -g @termly-dev/cli`
+
+**Common installation errors:**
+
+The installer will block and show specific instructions if components are missing:
+
+**"Missing: C++ build tools"**
+- Open Visual Studio Installer → Modify → Workloads tab
+- Check: "Desktop development with C++"
+
+**"Missing: Spectre-mitigated libraries"**
+- Open Visual Studio Installer → Modify → Individual Components tab
+- Search "Spectre" and check: "MSVC v143 - VS 2022 C++ x64/x86 Spectre-mitigated libs (Latest)"
+
+**"Missing: Windows SDK"**
+- Open Visual Studio Installer → Modify → Individual Components tab
+- Search "Windows SDK" and check: "Windows 11 SDK (10.0.22621.0)" or any available version
+
+After fixing missing components, retry: `npm install -g @termly-dev/cli`
+
+#### macOS
+Works out-of-the-box. Xcode Command Line Tools usually installed automatically.
+
+If needed:
+```bash
+xcode-select --install
+```
+
+### Platform-Specific Notes
+
+**ARM64 Linux (AWS Graviton, Raspberry Pi):**
+- Build tools are **mandatory** (no prebuilt binaries)
+- Compilation takes 2-5 minutes
+
+**Windows ARM64:**
+- May require Visual Studio with ARM64 build tools
+
+**Docker/Containers:**
+- Use base images with build tools pre-installed
+- Example: `node:18` (Debian-based) already includes build-essential
 
 ## Environments
 
@@ -107,26 +229,26 @@ Termly CLI supports **17 interactive terminal-based AI coding assistants**:
 
 ### Official Tools from Major Companies
 - **Claude Code** (Anthropic) - AI coding assistant
-- **OpenAI Codex CLI** (OpenAI) - Official Codex CLI (April 2025)
-- **Google Gemini CLI** (Google) - 1M token context
 - **GitHub Copilot CLI** (Microsoft) - Command line AI
+- **Cursor CLI** (Cursor) - AI coding assistant CLI
 - **Cody CLI** (Sourcegraph) - AI assistant (Beta)
 - **Amazon Q Developer** (AWS) - Free tier available
-- **Grok CLI** (xAI/Elon Musk) - Grok AI assistant
 
 ### Popular Open-Source Tools
 - **Aider** - AI pair programming (35k+ stars)
 - **Continue CLI** - Modular architecture
 - **OpenHands** - Open-source Devin alternative
-- **OpenCode** - Terminal-native (26k+ stars)
 - **Mentat** - Git integration
-- **Cursor Agent** - From Cursor ecosystem
-
-### Specialized Tools
 - **ChatGPT CLI** - ChatGPT in terminal
 - **ShellGPT** - Shell command assistant
 - **Ollama** - Run LLMs locally (CodeLlama, etc)
 - **Blackbox AI** - Debugging & file editing
+
+### Experimental/Future Support
+- **OpenAI Codex CLI** - When released
+- **Google Gemini CLI** - When released
+- **Grok CLI** - When released
+- **OpenCode** - When released
 
 **And more...** - Works with any terminal-based AI tool
 
@@ -231,11 +353,64 @@ Remove stale sessions (processes that are no longer running).
 
 ## Requirements
 
-- Node.js 18+
-- At least one AI coding assistant installed
-- Mobile app (iOS/Android)
+- **Node.js 18+**
+- **Build tools** (Linux: gcc/make, Windows: VS2022/Spectre libs, macOS: Xcode CLI)
+- **At least one AI coding assistant** installed (see Supported AI Tools section)
+- **Mobile app** (iOS/Android) - coming soon
 
 ## Troubleshooting
+
+### Installation Issues
+
+**Automatic Build Tools Check**
+
+The installer automatically verifies build requirements on all platforms:
+- **Linux**: Checks for make, gcc/g++, python3
+- **Windows**: Checks for MSVC compiler, Spectre libs, Windows SDK, Python
+- **macOS**: Checks for Xcode Command Line Tools (warning only)
+
+If components are missing, installation will be **blocked** with detailed instructions.
+
+**Linux: Installation blocked - missing build tools**
+
+The installer detected missing components. Install them:
+```bash
+# Amazon Linux / RHEL / CentOS
+sudo yum install gcc-c++ make python3 -y
+
+# Ubuntu / Debian
+sudo apt-get install build-essential python3 -y
+```
+
+Then retry: `npm install -g @termly-dev/cli`
+
+**Windows: Installation blocked - missing components**
+
+The installer will show exactly what's missing and how to fix it.
+
+Common fixes:
+- **Missing C++ build tools**: Install "Desktop development with C++" workload
+- **Missing Spectre libraries**: Add "MSVC v143 Spectre-mitigated libs" in Individual Components
+- **Missing Windows SDK**: Add "Windows 11 SDK" in Individual Components
+- **Missing Python**: Download from [python.org](https://www.python.org/downloads/)
+
+See detailed instructions in the error message or [Windows requirements](#windows) section.
+
+**Windows: "EPERM: operation not permitted" during cleanup**
+
+This is a warning, not an error. Installation likely succeeded. Verify:
+```cmd
+termly --version
+```
+
+**macOS: "gyp: No Xcode or CLT version detected"**
+
+Install Xcode Command Line Tools:
+```bash
+xcode-select --install
+```
+
+### Usage Issues
 
 **No AI tools detected?**
 

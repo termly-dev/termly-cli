@@ -120,6 +120,7 @@ program.on('--help', () => {
   console.log('  • Aider');
   console.log('  • GitHub Copilot CLI');
   console.log('  • Cursor');
+  console.log('  • Continue');
   console.log('  • Cody');
   console.log('  • And more...');
   console.log('');

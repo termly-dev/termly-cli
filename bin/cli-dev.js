@@ -2,7 +2,7 @@
 
 const { Command } = require('commander');
 const chalk = require('chalk');
-const packageJson = require('../package.dev.json');
+const packageJson = require('../package.json');
 
 // Import commands
 const setupCommand = require('../lib/commands/setup');
@@ -122,6 +122,7 @@ program.on('--help', () => {
   console.log('  • Aider');
   console.log('  • GitHub Copilot CLI');
   console.log('  • Cursor');
+  console.log('  • Continue');
   console.log('  • Cody');
   console.log('  • And more...');
   console.log('');
