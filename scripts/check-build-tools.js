@@ -153,11 +153,23 @@ function checkVisualStudio() {
             const versions = fs.readdirSync(msvcPath);
             if (DEBUG) console.error(`[DEBUG] Found MSVC versions: ${versions.join(', ')}`);
 
-            if (versions.length > 0) {
-              msvcInstalled = true; // Found MSVC toolset
-              if (DEBUG) console.error(`[DEBUG] MSVC toolset found!`);
-              break;
+            // Check each version for actual compiler (cl.exe)
+            for (const version of versions) {
+              const compilerPath = path.join(msvcPath, version, 'bin', 'Hostx64', 'x64', 'cl.exe');
+              const compilerPathX86 = path.join(msvcPath, version, 'bin', 'Hostx86', 'x86', 'cl.exe');
+
+              if (DEBUG) console.error(`[DEBUG] Checking for compiler: ${compilerPath}`);
+
+              if (fs.existsSync(compilerPath) || fs.existsSync(compilerPathX86)) {
+                msvcInstalled = true; // Found real MSVC toolset with compiler
+                if (DEBUG) console.error(`[DEBUG] MSVC toolset with compiler found at version ${version}!`);
+                break;
+              } else {
+                if (DEBUG) console.error(`[DEBUG] Version ${version} exists but no compiler found`);
+              }
             }
+
+            if (msvcInstalled) break;
           } catch (err) {
             if (DEBUG) console.error(`[DEBUG] Error reading MSVC path: ${err.message}`);
           }
