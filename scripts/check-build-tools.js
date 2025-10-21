@@ -83,11 +83,11 @@ function checkLinux(packageName) {
 
     process.exit(1);
   } else {
-    console.log('\n' + colorize('✓ Linux Build Tools Check Passed', COLORS.cyan));
-    console.log(colorize('  ✓ make found', COLORS.cyan));
-    console.log(colorize('  ✓ gcc/g++ found', COLORS.cyan));
-    console.log(colorize('  ✓ python found', COLORS.cyan));
-    console.log('');
+    console.error('\n' + colorize('✓ Linux Build Tools Check Passed', COLORS.cyan));
+    console.error(colorize('  ✓ make found', COLORS.cyan));
+    console.error(colorize('  ✓ gcc/g++ found', COLORS.cyan));
+    console.error(colorize('  ✓ python found', COLORS.cyan));
+    console.error('');
   }
 }
 
@@ -96,22 +96,25 @@ function checkMacOS() {
   // Only check if xcode-select exists
   try {
     execSync('xcode-select -p', { stdio: 'ignore' });
-    console.log('\n' + colorize('✓ macOS Build Tools Check Passed', COLORS.cyan));
-    console.log(colorize('  ✓ Xcode Command Line Tools found', COLORS.cyan));
-    console.log('');
+    console.error('\n' + colorize('✓ macOS Build Tools Check Passed', COLORS.cyan));
+    console.error(colorize('  ✓ Xcode Command Line Tools found', COLORS.cyan));
+    console.error('');
   } catch {
-    console.warn('\n' + colorize('⚠️  Warning: Xcode Command Line Tools not detected', COLORS.yellow));
-    console.warn('\nIf installation fails, run:');
-    console.warn('  ' + colorize('xcode-select --install', COLORS.cyan));
-    console.warn('\n' + colorize('Attempting installation anyway (prebuilt binaries may work)...', COLORS.yellow));
-    console.warn('');
+    console.error('\n' + colorize('⚠️  Warning: Xcode Command Line Tools not detected', COLORS.yellow));
+    console.error('\nIf installation fails, run:');
+    console.error('  ' + colorize('xcode-select --install', COLORS.cyan));
+    console.error('\n' + colorize('Attempting installation anyway (prebuilt binaries may work)...', COLORS.yellow));
+    console.error('');
     // Don't exit - let npm try, prebuilt binaries might work
   }
 }
 
 function checkVisualStudio() {
-  // Check for Visual Studio installation via file system
+  // Check for Visual Studio with MSVC toolset installed
   const fs = require('fs');
+  const path = require('path');
+
+  const DEBUG = process.env.DEBUG || false;
 
   const possiblePaths = [
     'C:\\Program Files\\Microsoft Visual Studio\\2022',
@@ -120,13 +123,57 @@ function checkVisualStudio() {
     'C:\\Program Files (x86)\\Microsoft Visual Studio\\2019'
   ];
 
+  let vsInstalled = false;
+  let msvcInstalled = false;
+
+  if (DEBUG) console.error('[DEBUG] Checking for Visual Studio...');
+
   for (const basePath of possiblePaths) {
-    if (fs.existsSync(basePath)) {
-      return true;
+    if (DEBUG) console.error(`[DEBUG] Checking path: ${basePath}`);
+    if (!fs.existsSync(basePath)) {
+      if (DEBUG) console.error(`[DEBUG] Path does not exist: ${basePath}`);
+      continue;
     }
+
+    // Check for MSVC toolset (not just VS installation)
+    const editions = ['Community', 'Professional', 'Enterprise', 'BuildTools'];
+    for (const edition of editions) {
+      const editionPath = path.join(basePath, edition);
+      if (DEBUG) console.error(`[DEBUG] Checking edition: ${editionPath}`);
+
+      if (fs.existsSync(editionPath)) {
+        vsInstalled = true; // VS is installed
+        if (DEBUG) console.error(`[DEBUG] Found VS edition: ${edition}`);
+
+        const msvcPath = path.join(editionPath, 'VC', 'Tools', 'MSVC');
+        if (DEBUG) console.error(`[DEBUG] Checking MSVC path: ${msvcPath}`);
+
+        if (fs.existsSync(msvcPath)) {
+          try {
+            const versions = fs.readdirSync(msvcPath);
+            if (DEBUG) console.error(`[DEBUG] Found MSVC versions: ${versions.join(', ')}`);
+
+            if (versions.length > 0) {
+              msvcInstalled = true; // Found MSVC toolset
+              if (DEBUG) console.error(`[DEBUG] MSVC toolset found!`);
+              break;
+            }
+          } catch (err) {
+            if (DEBUG) console.error(`[DEBUG] Error reading MSVC path: ${err.message}`);
+          }
+        } else {
+          if (DEBUG) console.error(`[DEBUG] MSVC path does not exist: ${msvcPath}`);
+        }
+      }
+    }
+    if (msvcInstalled) break;
   }
 
-  return false;
+  if (DEBUG) {
+    console.error(`[DEBUG] Final result: vsInstalled=${vsInstalled}, msvcInstalled=${msvcInstalled}`);
+  }
+
+  return { vsInstalled, msvcInstalled };
 }
 
 function checkSpectreLibs() {
@@ -183,22 +230,29 @@ function getWindowsArch() {
 
 function checkWindows(packageName) {
   // Windows - check for Visual Studio or build tools
-  const hasVS = checkVisualStudio();
+  const vsCheck = checkVisualStudio();
   const hasPython = commandExists('python') || commandExists('python3');
-  const hasSpectre = hasVS ? checkSpectreLibs() : false;
+  const hasSpectre = vsCheck.msvcInstalled ? checkSpectreLibs() : false;
   const arch = getWindowsArch();
 
   // If ANY check fails - show full instructions and block
-  if (!hasVS || !hasPython || !hasSpectre) {
+  if (!vsCheck.msvcInstalled || !hasPython || !hasSpectre) {
     console.error('\n\n');
     console.error(colorize('╔════════════════════════════════════════════════════════════════╗', COLORS.red));
     console.error(colorize('║  ❌ INSTALLATION BLOCKED - Missing Build Tools                 ║', COLORS.red));
     console.error(colorize('╚════════════════════════════════════════════════════════════════╝', COLORS.red));
     console.error('\n' + colorize('Termly CLI cannot install without required components.', COLORS.bold));
     console.error('\nMissing components:');
-    if (!hasVS) console.error(colorize('  ✗ Visual Studio 2019/2022', COLORS.red));
+
+    // More specific error messages
+    if (!vsCheck.vsInstalled) {
+      console.error(colorize('  ✗ Visual Studio 2019/2022', COLORS.red));
+    } else if (!vsCheck.msvcInstalled) {
+      console.error(colorize('  ✗ C++ build tools (Desktop development with C++ workload)', COLORS.red));
+    }
+
     if (!hasPython) console.error(colorize('  ✗ Python 3.x', COLORS.red));
-    if (hasVS && !hasSpectre) console.error(colorize('  ✗ Spectre-mitigated libraries', COLORS.red));
+    if (vsCheck.msvcInstalled && !hasSpectre) console.error(colorize('  ✗ Spectre-mitigated libraries', COLORS.red));
 
     console.error('\n' + colorize('═══════════════════════════════════════════════════════════════', COLORS.cyan));
     console.error(colorize('SETUP INSTRUCTIONS:', COLORS.bold));
@@ -244,11 +298,11 @@ function checkWindows(packageName) {
   }
 
   // All checks passed
-  console.log('\n' + colorize('✓ Windows Build Tools Check Passed', COLORS.cyan));
-  console.log(colorize('  ✓ Visual Studio found', COLORS.cyan));
-  console.log(colorize('  ✓ Python found', COLORS.cyan));
-  console.log(colorize('  ✓ Spectre-mitigated libraries found', COLORS.cyan));
-  console.log('');
+  console.error('\n' + colorize('✓ Windows Build Tools Check Passed', COLORS.cyan));
+  console.error(colorize('  ✓ Visual Studio found', COLORS.cyan));
+  console.error(colorize('  ✓ Python found', COLORS.cyan));
+  console.error(colorize('  ✓ Spectre-mitigated libraries found', COLORS.cyan));
+  console.error('');
 }
 
 // Detect package name from package.json
@@ -268,7 +322,7 @@ function getPackageName() {
 const currentPlatform = platform();
 const packageName = getPackageName();
 
-console.log(colorize('\n🔧 Checking build requirements...', COLORS.cyan));
+console.error(colorize('\n🔧 Checking build requirements...', COLORS.cyan));
 
 if (currentPlatform === 'linux') {
   checkLinux(packageName);
@@ -278,7 +332,7 @@ if (currentPlatform === 'linux') {
   checkWindows(packageName);
 } else {
   // Unknown platform - just pass through
-  console.log(colorize('⚠️  Unknown platform - skipping checks\n', COLORS.yellow));
+  console.error(colorize('⚠️  Unknown platform - skipping checks\n', COLORS.yellow));
 }
 
 process.exit(0);
