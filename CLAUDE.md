@@ -204,18 +204,27 @@ Message types to mobile:
 - Sent to server at `/api/pairing` endpoint
 
 ### Error Handling Patterns
-- Outdated CLI version: Block start with update command from server
-- AI tool not found: Show installation instructions specific to tool
-- Session exists in dir: Show session info + suggest `termly stop`
-- Network error: Auto-reconnect with backoff (version check skipped on network error)
-- PTY crash: Log exit code, update session status
-- Stale sessions: Detected by PID check, removable via `cleanup`
+- **Missing build tools:** `scripts/check-build-tools.js` preinstall script checks for make/gcc/python before npm install (Linux only blocks, macOS/Windows show warnings)
+- **Outdated CLI version:** Block start with update command from server
+- **AI tool not found:** Show installation instructions specific to tool
+- **Session exists in dir:** Show session info + suggest `termly stop`
+- **Network error:** Auto-reconnect with backoff (version check skipped on network error)
+- **PTY crash:** Log exit code, update session status
+- **Stale sessions:** Detected by PID check, removable via `cleanup`
 
 ## Special Considerations
 
 **Chalk version:** Must use v4.x (v5+ is ESM-only)
 **Conf version:** Must use v10.x (v11+ is ESM-only)
 **Node version:** Requires 18+ (uses crypto.hkdfSync, native ESM support)
+
+**node-pty native dependency:**
+- Requires C++ build tools (make, gcc/g++, python) on all platforms
+- Linux: Build tools MANDATORY (no prebuilt binaries for ARM64)
+- Windows: Prebuilt binaries usually available for x64, may need Visual Studio 2022 + Spectre libs
+- macOS: Works with Xcode CLI tools
+- `scripts/check-build-tools.js` validates requirements during `npm install` (preinstall hook)
+- Cannot be replaced - PTY is essential for interactive AI tool terminal emulation
 
 **Testing without server:**
 The implementation includes WebSocket client code but the actual server (api.termly.dev) is not implemented. For testing, the `start` command will generate pairing code and QR but won't complete the WebSocket handshake.
@@ -251,5 +260,7 @@ Edit `lib/ai-tools/registry.js`:
 **Environment changes:** `lib/config/environment.js` (add new environments or modify URLs here)
 
 **Version checking:** `lib/utils/version-checker.js` (CLI version validation logic)
+
+**Installation checks:** `scripts/check-build-tools.js` (preinstall hook that validates build tools)
 
 **New environment setup:** Edit `lib/config/environment.js` ENVIRONMENTS object, then create corresponding package file (e.g., `package.staging.json`) and binary (`bin/cli-staging.js`)

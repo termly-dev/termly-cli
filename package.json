@@ -1,12 +1,13 @@
 {
   "name": "@termly-dev/cli",
-  "version": "0.5.0",
+  "version": "0.5.6",
   "description": "Universal terminal access for AI coding assistants",
   "main": "index.js",
   "bin": {
     "termly": "./bin/cli.js"
   },
   "scripts": {
+    "preinstall": "node scripts/check-build-tools.js",
     "start": "node bin/cli.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
