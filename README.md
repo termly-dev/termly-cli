@@ -229,26 +229,26 @@ Termly CLI supports **17 interactive terminal-based AI coding assistants**:
 
 ### Official Tools from Major Companies
 - **Claude Code** (Anthropic) - AI coding assistant
-- **OpenAI Codex CLI** (OpenAI) - Official Codex CLI (April 2025)
-- **Google Gemini CLI** (Google) - 1M token context
 - **GitHub Copilot CLI** (Microsoft) - Command line AI
+- **Cursor CLI** (Cursor) - AI coding assistant CLI
 - **Cody CLI** (Sourcegraph) - AI assistant (Beta)
 - **Amazon Q Developer** (AWS) - Free tier available
-- **Grok CLI** (xAI/Elon Musk) - Grok AI assistant
 
 ### Popular Open-Source Tools
 - **Aider** - AI pair programming (35k+ stars)
 - **Continue CLI** - Modular architecture
 - **OpenHands** - Open-source Devin alternative
-- **OpenCode** - Terminal-native (26k+ stars)
 - **Mentat** - Git integration
-- **Cursor Agent** - From Cursor ecosystem
-
-### Specialized Tools
 - **ChatGPT CLI** - ChatGPT in terminal
 - **ShellGPT** - Shell command assistant
 - **Ollama** - Run LLMs locally (CodeLlama, etc)
 - **Blackbox AI** - Debugging & file editing
+
+### Experimental/Future Support
+- **OpenAI Codex CLI** - When released
+- **Google Gemini CLI** - When released
+- **Grok CLI** - When released
+- **OpenCode** - When released
 
 **And more...** - Works with any terminal-based AI tool
 
