@@ -3,6 +3,8 @@
 .gitignore
 .DS_Store
 *.log
+package.dev.json
+test-*.js
 
 # Documentation (included in npm package)
 # Remove this line if you want to exclude docs

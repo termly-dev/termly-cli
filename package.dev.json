@@ -1,6 +1,6 @@
 {
   "name": "@termly-dev/cli-dev",
-  "version": "0.6.2",
+  "version": "0.6.5",
   "description": "Universal terminal access for AI coding assistants (Development version)",
   "main": "index.js",
   "bin": {
@@ -35,8 +35,7 @@
   "files": [
     "bin/",
     "lib/",
-    "scripts/",
-    "*.md"
+    "scripts/"
   ],
   "dependencies": {
     "axios": "^1.6.0",
