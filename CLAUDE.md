@@ -108,21 +108,6 @@ The CLI includes a **preinstall** script (`scripts/check-build-tools.js`) that v
 
 **Output:** All messages use `console.error()` (stderr) because npm suppresses stdout for preinstall scripts.
 
-**Debug mode:** Set `DEBUG=1` environment variable to see detailed path checking logs.
-
-### Testing Build Checks
-
-Standalone test scripts available (not published to npm):
-```bash
-# Test Visual Studio/MSVC detection (Windows)
-node test-windows-build-tools.js
-
-# Test Spectre libs and Windows SDK (Windows)
-node test-spectre-sdk.js
-```
-
-These scripts provide detailed output about what's found/missing without running npm install.
-
 ## Architecture
 
 ### Core Data Flow

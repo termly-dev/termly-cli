@@ -1,6 +1,6 @@
 {
   "name": "@termly-dev/cli",
-  "version": "0.6.6",
+  "version": "0.6.7",
   "description": "Universal terminal access for AI coding assistants",
   "main": "index.js",
   "bin": {

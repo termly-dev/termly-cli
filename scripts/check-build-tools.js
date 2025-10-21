@@ -114,8 +114,6 @@ function checkVisualStudio() {
   const fs = require('fs');
   const path = require('path');
 
-  const DEBUG = process.env.DEBUG || false;
-
   const possiblePaths = [
     'C:\\Program Files\\Microsoft Visual Studio\\2022',
     'C:\\Program Files\\Microsoft Visual Studio\\2019',
@@ -126,63 +124,42 @@ function checkVisualStudio() {
   let vsInstalled = false;
   let msvcInstalled = false;
 
-  if (DEBUG) console.error('[DEBUG] Checking for Visual Studio...');
-
   for (const basePath of possiblePaths) {
-    if (DEBUG) console.error(`[DEBUG] Checking path: ${basePath}`);
-    if (!fs.existsSync(basePath)) {
-      if (DEBUG) console.error(`[DEBUG] Path does not exist: ${basePath}`);
-      continue;
-    }
+    if (!fs.existsSync(basePath)) continue;
 
     // Check for MSVC toolset (not just VS installation)
     const editions = ['Community', 'Professional', 'Enterprise', 'BuildTools'];
     for (const edition of editions) {
       const editionPath = path.join(basePath, edition);
-      if (DEBUG) console.error(`[DEBUG] Checking edition: ${editionPath}`);
 
       if (fs.existsSync(editionPath)) {
         vsInstalled = true; // VS is installed
-        if (DEBUG) console.error(`[DEBUG] Found VS edition: ${edition}`);
 
         const msvcPath = path.join(editionPath, 'VC', 'Tools', 'MSVC');
-        if (DEBUG) console.error(`[DEBUG] Checking MSVC path: ${msvcPath}`);
 
         if (fs.existsSync(msvcPath)) {
           try {
             const versions = fs.readdirSync(msvcPath);
-            if (DEBUG) console.error(`[DEBUG] Found MSVC versions: ${versions.join(', ')}`);
 
             // Check each version for actual compiler (cl.exe)
             for (const version of versions) {
               const compilerPath = path.join(msvcPath, version, 'bin', 'Hostx64', 'x64', 'cl.exe');
               const compilerPathX86 = path.join(msvcPath, version, 'bin', 'Hostx86', 'x86', 'cl.exe');
 
-              if (DEBUG) console.error(`[DEBUG] Checking for compiler: ${compilerPath}`);
-
               if (fs.existsSync(compilerPath) || fs.existsSync(compilerPathX86)) {
                 msvcInstalled = true; // Found real MSVC toolset with compiler
-                if (DEBUG) console.error(`[DEBUG] MSVC toolset with compiler found at version ${version}!`);
                 break;
-              } else {
-                if (DEBUG) console.error(`[DEBUG] Version ${version} exists but no compiler found`);
               }
             }
 
             if (msvcInstalled) break;
           } catch (err) {
-            if (DEBUG) console.error(`[DEBUG] Error reading MSVC path: ${err.message}`);
+            // Ignore errors reading MSVC path
           }
-        } else {
-          if (DEBUG) console.error(`[DEBUG] MSVC path does not exist: ${msvcPath}`);
         }
       }
     }
     if (msvcInstalled) break;
-  }
-
-  if (DEBUG) {
-    console.error(`[DEBUG] Final result: vsInstalled=${vsInstalled}, msvcInstalled=${msvcInstalled}`);
   }
 
   return { vsInstalled, msvcInstalled };
