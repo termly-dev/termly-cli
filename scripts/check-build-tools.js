@@ -109,8 +109,60 @@ function checkMacOS() {
   }
 }
 
+function checkVSWorkloadInstalled() {
+  // Use vswhere.exe to check if C++ workload is properly installed
+  // This is what node-gyp actually checks, not just file existence
+  const fs = require('fs');
+  const path = require('path');
+
+  const vswherePath = 'C:\\Program Files (x86)\\Microsoft Visual Studio\\Installer\\vswhere.exe';
+
+  if (!fs.existsSync(vswherePath)) {
+    return { method: 'vswhere', found: false, reason: 'vswhere.exe not found' };
+  }
+
+  try {
+    // Check for C++ desktop development workload
+    // This is the official way node-gyp detects VS installations
+    const result = execSync(
+      `"${vswherePath}" -latest -requires Microsoft.VisualStudio.Workload.NativeDesktop -property installationPath`,
+      { encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'] }
+    ).trim();
+
+    if (result && result.length > 0) {
+      // Verify MSVC toolset exists at this path
+      const msvcPath = path.join(result, 'VC', 'Tools', 'MSVC');
+      if (fs.existsSync(msvcPath)) {
+        const versions = fs.readdirSync(msvcPath);
+        for (const version of versions) {
+          const compilerPath = path.join(msvcPath, version, 'bin', 'Hostx64', 'x64', 'cl.exe');
+          if (fs.existsSync(compilerPath)) {
+            return { method: 'vswhere', found: true, path: result, version };
+          }
+        }
+      }
+    }
+
+    return { method: 'vswhere', found: false, reason: 'C++ workload not installed' };
+  } catch (err) {
+    return { method: 'vswhere', found: false, reason: `vswhere failed: ${err.message}` };
+  }
+}
+
 function checkVisualStudio() {
-  // Check for Visual Studio with MSVC toolset installed
+  // Primary check: use vswhere (same as node-gyp)
+  const vswhereCheck = checkVSWorkloadInstalled();
+
+  if (vswhereCheck.found) {
+    return {
+      vsInstalled: true,
+      msvcInstalled: true,
+      method: 'vswhere',
+      workloadInstalled: true
+    };
+  }
+
+  // Fallback: file-based check (but warn if workload not properly registered)
   const fs = require('fs');
   const path = require('path');
 
@@ -127,13 +179,12 @@ function checkVisualStudio() {
   for (const basePath of possiblePaths) {
     if (!fs.existsSync(basePath)) continue;
 
-    // Check for MSVC toolset (not just VS installation)
     const editions = ['Community', 'Professional', 'Enterprise', 'BuildTools'];
     for (const edition of editions) {
       const editionPath = path.join(basePath, edition);
 
       if (fs.existsSync(editionPath)) {
-        vsInstalled = true; // VS is installed
+        vsInstalled = true;
 
         const msvcPath = path.join(editionPath, 'VC', 'Tools', 'MSVC');
 
@@ -141,13 +192,12 @@ function checkVisualStudio() {
           try {
             const versions = fs.readdirSync(msvcPath);
 
-            // Check each version for actual compiler (cl.exe)
             for (const version of versions) {
               const compilerPath = path.join(msvcPath, version, 'bin', 'Hostx64', 'x64', 'cl.exe');
               const compilerPathX86 = path.join(msvcPath, version, 'bin', 'Hostx86', 'x86', 'cl.exe');
 
               if (fs.existsSync(compilerPath) || fs.existsSync(compilerPathX86)) {
-                msvcInstalled = true; // Found real MSVC toolset with compiler
+                msvcInstalled = true;
                 break;
               }
             }
@@ -162,7 +212,14 @@ function checkVisualStudio() {
     if (msvcInstalled) break;
   }
 
-  return { vsInstalled, msvcInstalled };
+  // Files exist but workload not registered = will fail with node-gyp
+  return {
+    vsInstalled,
+    msvcInstalled,
+    method: 'filesystem',
+    workloadInstalled: false,
+    vswhereReason: vswhereCheck.reason
+  };
 }
 
 function checkSpectreLibs() {
@@ -252,6 +309,58 @@ function checkWindows(packageName) {
   const hasSDK = checkWindowsSDK();
   const arch = getWindowsArch();
 
+  // Special case: files exist but workload not registered (node-gyp will fail)
+  if (vsCheck.msvcInstalled && !vsCheck.workloadInstalled) {
+    console.error('\n\n');
+    console.error(colorize('╔════════════════════════════════════════════════════════════════╗', COLORS.red));
+    console.error(colorize('║  ❌ INSTALLATION WILL FAIL - Workload Not Properly Installed  ║', COLORS.red));
+    console.error(colorize('╚════════════════════════════════════════════════════════════════╝', COLORS.red));
+    console.error('\n' + colorize('WARNING: C++ compiler files exist, but the workload is not properly registered!', COLORS.bold));
+    console.error('\n' + colorize('This means node-gyp WILL FAIL even though files are present.', COLORS.bold));
+    console.error('\nDetection details:');
+    console.error(colorize('  ✓ Visual Studio installation: FOUND', COLORS.cyan));
+    console.error(colorize('  ✓ MSVC compiler files (cl.exe): FOUND', COLORS.cyan));
+    console.error(colorize('  ✗ C++ Desktop Development workload: NOT REGISTERED', COLORS.red));
+    if (vsCheck.vswhereReason) {
+      console.error(colorize(`     Reason: ${vsCheck.vswhereReason}`, COLORS.yellow));
+    }
+
+    console.error('\n' + colorize('═══════════════════════════════════════════════════════════════', COLORS.cyan));
+    console.error(colorize('FIX: Reinstall the C++ workload via Visual Studio Installer', COLORS.bold));
+    console.error(colorize('═══════════════════════════════════════════════════════════════', COLORS.cyan));
+
+    console.error('\n' + colorize('STEP 1: Open Visual Studio Installer', COLORS.cyan));
+    console.error('    • Press Windows key, type: ' + colorize('Visual Studio Installer', COLORS.yellow));
+    console.error('    • Or run from Start Menu');
+
+    console.error('\n' + colorize('STEP 2: Modify your installation', COLORS.cyan));
+    console.error('    • Click ' + colorize('Modify', COLORS.yellow) + ' button on your VS installation');
+    console.error('    • Go to ' + colorize('Workloads', COLORS.yellow) + ' tab');
+    console.error('    • ' + colorize('UNCHECK', COLORS.bold) + ' "Desktop development with C++"');
+    console.error('    • Click ' + colorize('Modify', COLORS.yellow) + ' to REMOVE it');
+    console.error('    • Wait for uninstall to complete');
+
+    console.error('\n' + colorize('STEP 3: Reinstall the workload (IMPORTANT!)', COLORS.cyan));
+    console.error('    • Click ' + colorize('Modify', COLORS.yellow) + ' again');
+    console.error('    • Go to ' + colorize('Workloads', COLORS.yellow) + ' tab');
+    console.error('    • ' + colorize('CHECK', COLORS.bold) + ' "Desktop development with C++"');
+    console.error('    • Go to ' + colorize('Individual Components', COLORS.yellow) + ' tab');
+    console.error('    • Search: ' + colorize('"Spectre"', COLORS.yellow));
+    console.error('    • Check: ' + colorize(`MSVC C++ ${arch} Spectre-mitigated libs (Latest)`, COLORS.yellow));
+    console.error('    • Ensure Windows SDK is checked');
+    console.error('    • Click ' + colorize('Modify', COLORS.yellow) + ' to INSTALL');
+
+    console.error('\n' + colorize('STEP 4: Restart terminal and retry', COLORS.cyan));
+    console.error('    • Close this window completely');
+    console.error('    • Open NEW terminal');
+    console.error('    • Run: ' + colorize(`npm install -g ${packageName}`, COLORS.yellow));
+
+    console.error('\n' + colorize('═══════════════════════════════════════════════════════════════', COLORS.cyan));
+    console.error('');
+
+    process.exit(1);
+  }
+
   // If ANY check fails - show full instructions and block
   if (!vsCheck.msvcInstalled || !hasPython || !hasSpectre || !hasSDK) {
     console.error('\n\n');
@@ -319,6 +428,9 @@ function checkWindows(packageName) {
   console.error('\n' + colorize('✓ Windows Build Tools Check Passed', COLORS.cyan));
   console.error(colorize('  ✓ Visual Studio found', COLORS.cyan));
   console.error(colorize('  ✓ MSVC compiler found', COLORS.cyan));
+  if (vsCheck.workloadInstalled) {
+    console.error(colorize('  ✓ C++ workload properly registered (vswhere)', COLORS.cyan));
+  }
   console.error(colorize('  ✓ Spectre-mitigated libraries found', COLORS.cyan));
   console.error(colorize('  ✓ Windows SDK found', COLORS.cyan));
   console.error(colorize('  ✓ Python found', COLORS.cyan));
