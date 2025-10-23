@@ -1,6 +1,6 @@
 {
   "name": "@termly-dev/cli",
-  "version": "0.6.9",
+  "version": "0.7.0",
   "description": "Universal terminal access for AI coding assistants",
   "main": "index.js",
   "bin": {
@@ -42,7 +42,7 @@
     "commander": "^11.0.0",
     "conf": "^10.2.0",
     "inquirer": "^8.2.5",
-    "node-pty": "^1.0.0",
+    "node-pty": "^1.1.0-beta37",
     "qrcode-terminal": "^0.12.0",
     "semver": "^7.7.3",
     "uuid": "^9.0.0",
