@@ -104,6 +104,9 @@ program.on('--help', () => {
   console.log('  $ termly-dev tools list                     # List available tools');
   console.log('  $ termly-dev status                         # Show all sessions');
   console.log('');
+  console.log('Special modes:');
+  console.log('  --ai demo    Demo mode for testing (no AI agent installation required)');
+  console.log('');
   console.log('Multiple Sessions:');
   console.log('  You can run multiple sessions simultaneously:');
   console.log('');
