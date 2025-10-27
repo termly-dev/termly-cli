@@ -1,7 +1,7 @@
 {
   "name": "@termly-dev/cli-dev",
   "version": "0.9.5",
-  "description": "Universal terminal access for AI coding assistants (Development version)",
+  "description": "Mirror your AI coding sessions to mobile - control Claude, Aider, Copilot, and 17+ tools from your phone (Development version)",
   "main": "index.js",
   "bin": {
     "termly-dev": "./bin/cli-dev.js"
@@ -25,9 +25,17 @@
   ],
   "author": "Termly Team",
   "license": "MIT",
+  "homepage": "https://termly.dev",
   "repository": {
     "type": "git",
     "url": "https://github.com/termly-dev/termly-cli"
+  },
+  "bugs": {
+    "url": "https://github.com/termly-dev/termly-cli/issues"
+  },
+  "funding": {
+    "type": "kofi",
+    "url": "https://ko-fi.com/termly"
   },
   "engines": {
     "node": ">=18.0.0"

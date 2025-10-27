@@ -19,7 +19,7 @@ const program = new Command();
 // Configure program
 program
   .name('termly-dev')
-  .description('Universal terminal access for AI coding assistants (Development)')
+  .description('Mirror your AI coding sessions to mobile - control 17+ tools from your phone (Development)')
   .version(packageJson.version, '-v, --version', 'Show version');
 
 // Setup command
@@ -129,7 +129,14 @@ program.on('--help', () => {
   console.log('  • Cody');
   console.log('  • And more...');
   console.log('');
-  console.log('For more information: https://dev.termly.dev/docs');
+  console.log('About Termly:');
+  console.log('  Termly mirrors your AI coding workflow to mobile in real time.');
+  console.log('  Your existing tools (Claude, Aider, Copilot, and more) stay with you');
+  console.log('  wherever you go — secured with end-to-end encryption.');
+  console.log('');
+  console.log('Website: https://termly.dev');
+  console.log('Support: https://ko-fi.com/termly');
+  console.log('');
 });
 
 // Parse arguments
