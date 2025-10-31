@@ -30,9 +30,9 @@ program
     await setupCommand();
   });
 
-// Start command
+// Start command - can be called explicitly or as default action
 program
-  .command('start [directory]')
+  .command('start [directory]', { isDefault: true })
   .description('Start AI tool with remote access')
   .option('--ai <tool>', 'Specify AI tool to use')
   .option('--ai-args <args>', 'Additional arguments for AI tool')
@@ -96,9 +96,10 @@ program
 program.on('--help', () => {
   console.log('');
   console.log('Examples:');
-  console.log('  $ termly start                          # Auto-detect AI tool');
-  console.log('  $ termly start --ai aider               # Use Aider');
-  console.log('  $ termly start --ai "claude code"       # Use Claude Code');
+  console.log('  $ termly                                # Auto-detect AI tool');
+  console.log('  $ termly --ai aider                     # Use Aider');
+  console.log('  $ termly --ai "claude code"             # Use Claude Code');
+  console.log('  $ termly start                          # Same as just "termly"');
   console.log('  $ termly tools list                     # List available tools');
   console.log('  $ termly status                         # Show all sessions');
   console.log('');
@@ -110,11 +111,11 @@ program.on('--help', () => {
   console.log('');
   console.log('  Terminal 1:');
   console.log('    $ cd ~/frontend');
-  console.log('    $ termly start');
+  console.log('    $ termly');
   console.log('');
   console.log('  Terminal 2:');
   console.log('    $ cd ~/backend');
-  console.log('    $ termly start');
+  console.log('    $ termly');
   console.log('');
   console.log('  Each session is independent with its own AI tool.');
   console.log('');
@@ -139,8 +140,3 @@ program.on('--help', () => {
 
 // Parse arguments
 program.parse(process.argv);
-
-// Show help if no command specified
-if (!process.argv.slice(2).length) {
-  program.outputHelp();
-}

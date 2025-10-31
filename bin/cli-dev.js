@@ -30,9 +30,9 @@ program
     await setupCommand();
   });
 
-// Start command
+// Start command - can be called explicitly or as default action
 program
-  .command('start [directory]')
+  .command('start [directory]', { isDefault: true })
   .description('Start AI tool with remote access')
   .option('--ai <tool>', 'Specify AI tool to use')
   .option('--ai-args <args>', 'Additional arguments for AI tool')
@@ -98,9 +98,10 @@ program.on('--help', () => {
   console.log(chalk.yellow('⚠️  Development version - connects to dev-api.termly.dev'));
   console.log('');
   console.log('Examples:');
-  console.log('  $ termly-dev start                          # Auto-detect AI tool');
-  console.log('  $ termly-dev start --ai aider               # Use Aider');
-  console.log('  $ termly-dev start --ai "claude code"       # Use Claude Code');
+  console.log('  $ termly-dev                                # Auto-detect AI tool');
+  console.log('  $ termly-dev --ai aider                     # Use Aider');
+  console.log('  $ termly-dev --ai "claude code"             # Use Claude Code');
+  console.log('  $ termly-dev start                          # Same as just "termly-dev"');
   console.log('  $ termly-dev tools list                     # List available tools');
   console.log('  $ termly-dev status                         # Show all sessions');
   console.log('');
@@ -112,11 +113,11 @@ program.on('--help', () => {
   console.log('');
   console.log('  Terminal 1:');
   console.log('    $ cd ~/frontend');
-  console.log('    $ termly-dev start');
+  console.log('    $ termly-dev');
   console.log('');
   console.log('  Terminal 2:');
   console.log('    $ cd ~/backend');
-  console.log('    $ termly-dev start');
+  console.log('    $ termly-dev');
   console.log('');
   console.log('  Each session is independent with its own AI tool.');
   console.log('');
@@ -141,8 +142,3 @@ program.on('--help', () => {
 
 // Parse arguments
 program.parse(process.argv);
-
-// Show help if no command specified
-if (!process.argv.slice(2).length) {
-  program.outputHelp();
-}
