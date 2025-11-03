@@ -172,10 +172,12 @@ The CLI includes a **preinstall** script (`scripts/check-build-tools.js`) that v
 - PTY continues running locally during reconnect
 
 **Mobile Reconnection (Session Resume):**
-1. Mobile sends `client_reconnected` with `lastSeq` number
-2. CLI retrieves `buffer.getAfter(lastSeq)`
-3. Sends all missed messages with original sequence numbers
-4. Sends `sync_complete` when catchup done
+1. Mobile sends `catchup_request` with `lastSeq` number
+2. CLI retrieves `buffer.getAfter(lastSeq)` to get missed messages
+3. Messages are split into batches of 100 and sent as `catchup_batch` messages
+4. Each batch contains array of encrypted messages with original sequence numbers
+5. 10ms delay between batches to prevent flooding
+6. Sends `sync_complete` when all batches delivered
 
 ### AI Tool Detection
 
@@ -212,6 +214,11 @@ The CLI includes a **preinstall** script (`scripts/check-build-tools.js`) that v
 **Logs:** `~/.termly/logs/cli.log`
 - Never logs: encryption keys, user input, encrypted content
 - Logs: connections, errors, session lifecycle, debug info
+- Debug mode (`DEBUG=1` or `--debug` flag):
+  - Shows verbose logging on console (WebSocket messages, catchup details, connection events)
+  - `logger.debug()` - only shown in debug mode
+  - `logger.debugInfo()` - written to file always, console only in debug mode
+  - Mobile connect/disconnect messages hidden by default, shown only in debug mode
 
 ## Important Implementation Notes
 
@@ -232,15 +239,16 @@ Message types from mobile:
 - `pairing_complete` → contains mobile's DH public key
 - `client_connected` → mobile joined
 - `client_disconnected` → mobile left
-- `client_reconnected` → mobile rejoined (sends lastSeq)
+- `catchup_request` → mobile rejoined (sends lastSeq to start catchup)
 - `input` → encrypted user input (decrypt → write to PTY)
 - `resize` → terminal resize {cols, rows}
 - `pong` → heartbeat response
 
 Message types to mobile:
 - `output` → encrypted PTY output with seq number
+- `catchup_batch` → batch of missed messages during session resume (up to 100 messages per batch)
 - `ping` → heartbeat (every 30s)
-- `sync_complete` → catchup finished
+- `sync_complete` → catchup finished (all batches delivered)
 
 ### Pairing Code Format
 - 6 chars: `[A-Z0-9]{6}` (e.g., ABC123)
