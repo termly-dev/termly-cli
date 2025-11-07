@@ -71,42 +71,32 @@ npm publish
 git checkout package.json  # Restore original
 ```
 
-## Build Tools Verification
+## Dependencies
 
-The CLI includes a **preinstall** script (`scripts/check-build-tools.js`) that validates build requirements before npm installs dependencies. This prevents cryptic node-gyp errors by checking upfront.
+### node-pty (Prebuilt Binaries)
 
-### What It Checks
+The CLI uses **@lydell/node-pty** - a fork of the official node-pty that includes prebuilt binaries for all platforms. This eliminates the need for C++ build tools during installation.
 
-**Linux:**
-- `make` command availability
-- `gcc`/`g++` compiler availability
-- `python3` or `python` availability
-- **Blocks installation** if any missing (exit code 1)
+**Supported platforms (no compilation required):**
+- Windows 10+ (x64, ARM64) - uses ConPTY only
+- macOS (Intel x64, Apple Silicon ARM64)
+- Linux (x64, ARM64)
 
-**Windows:**
-- Visual Studio 2022/2019 installation (Community/Professional/Enterprise/BuildTools)
-- **MSVC compiler** (`cl.exe`) - verifies actual compiler binary exists, not just folders
-- **Spectre-mitigated libraries** - checks for files in `lib/spectre/{x64,x86,arm64}` folders
-- **Windows SDK** - verifies SDK in `C:\Program Files (x86)\Windows Kits\10\Include\`
-- Python availability
-- **Blocks installation** if any missing (exit code 1)
+**Note:** Windows 7/8 are NOT supported as this fork only supports ConPTY (available from Windows 10 build 17763+).
 
-**macOS:**
-- Xcode Command Line Tools (`xcode-select -p`)
-- **Warning only** - doesn't block (prebuilt binaries usually available)
+**Package specification:**
+```json
+"node-pty": "npm:@lydell/node-pty@^1.1.0"
+```
 
-### Implementation Details
+**Benefits:**
+- ✅ No Visual Studio required on Windows
+- ✅ No Xcode CLI tools required on macOS
+- ✅ No build-essential required on Linux
+- ✅ Fast installation (no compilation)
+- ✅ Consistent binaries across all platforms
 
-**File:** `scripts/check-build-tools.js`
-
-**Key functions:**
-- `checkVisualStudio()` - Scans VS installation paths, verifies MSVC toolset by checking for `cl.exe` compiler binary
-- `checkSpectreLibs()` - Verifies Spectre-mitigated libraries exist and contain files
-- `checkWindowsSDK()` - Checks for Windows SDK in standard installation locations
-- `checkLinux()` - Uses `commandExists()` to verify make/gcc/python
-- `checkMacOS()` - Checks Xcode CLI tools, shows warning if missing but continues
-
-**Output:** All messages use `console.error()` (stderr) because npm suppresses stdout for preinstall scripts.
+**Legacy note:** The `scripts/check-build-tools.js` file remains in the repository for historical reference but is no longer used in the installation process.
 
 ## Architecture
 
@@ -114,12 +104,9 @@ The CLI includes a **preinstall** script (`scripts/check-build-tools.js`) that v
 
 **Installation Flow:**
 1. User runs `npm install -g @termly-dev/cli` (or cli-dev)
-2. **Preinstall script** (`scripts/check-build-tools.js`) runs FIRST
-   - Checks platform-specific build requirements
-   - Blocks installation with detailed instructions if components missing
-   - Exits with code 1 to prevent npm from continuing
-3. If checks pass, npm proceeds with dependency installation
-4. `node-pty` compiles successfully because all required tools are present
+2. npm installs all dependencies including @lydell/node-pty
+3. @lydell/node-pty automatically selects the correct prebuilt binary for the platform (no compilation needed)
+4. Installation completes in seconds without requiring any build tools
 
 **Start Command Flow:**
 1. `utils/version-checker.js` → checks CLI version against server minimum (blocks if outdated)
@@ -258,7 +245,6 @@ Message types to mobile:
 - Sent to server at `/api/pairing` endpoint
 
 ### Error Handling Patterns
-- **Missing build tools:** `scripts/check-build-tools.js` preinstall script checks for make/gcc/python before npm install (Linux only blocks, macOS/Windows show warnings)
 - **Outdated CLI version:** Block start with update command from server
 - **AI tool not found:** Show installation instructions specific to tool
 - **Session exists in dir:** Show session info + suggest `termly stop`
@@ -272,13 +258,12 @@ Message types to mobile:
 **Conf version:** Must use v10.x (v11+ is ESM-only)
 **Node version:** Requires 18+ (uses crypto.hkdfSync, native ESM support)
 
-**node-pty native dependency:**
-- Requires C++ build tools (make, gcc/g++, python) on all platforms
-- Linux: Build tools MANDATORY (no prebuilt binaries for ARM64)
-- Windows: Prebuilt binaries usually available for x64, may need Visual Studio 2022 + Spectre libs
-- macOS: Works with Xcode CLI tools
-- `scripts/check-build-tools.js` validates requirements during `npm install` (preinstall hook)
+**node-pty (via @lydell/node-pty):**
+- Uses prebuilt binaries for all platforms (Windows, macOS, Linux - both x64 and ARM64)
+- No C++ build tools required for installation
+- Windows: Requires Windows 10 build 17763+ (ConPTY only, WinPTY removed)
 - Cannot be replaced - PTY is essential for interactive AI tool terminal emulation
+- API compatible with official node-pty 1.1.0
 
 **Testing without server:**
 The implementation includes WebSocket client code but the actual server (api.termly.dev) is not implemented. For testing, the `start` command will generate pairing code and QR but won't complete the WebSocket handshake.
@@ -314,7 +299,5 @@ Edit `lib/ai-tools/registry.js`:
 **Environment changes:** `lib/config/environment.js` (add new environments or modify URLs here)
 
 **Version checking:** `lib/utils/version-checker.js` (CLI version validation logic)
-
-**Installation checks:** `scripts/check-build-tools.js` (preinstall hook that validates build tools)
 
 **New environment setup:** Edit `lib/config/environment.js` ENVIRONMENTS object, then create corresponding package file (e.g., `package.staging.json`) and binary (`bin/cli-staging.js`)
