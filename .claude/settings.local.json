@@ -11,7 +11,8 @@
       "Bash(curl:*)",
       "Bash(tar:*)",
       "WebFetch(domain:github.com)",
-      "Bash(npm view:*)"
+      "Bash(npm view:*)",
+      "WebSearch"
     ],
     "deny": [],
     "ask": []
