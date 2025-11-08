@@ -1,6 +1,6 @@
 {
   "name": "@termly-dev/cli-dev",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Mirror your AI coding sessions to mobile - control Claude, Aider, Copilot, and 17+ tools from your phone (Development version)",
   "main": "index.js",
   "bin": {
