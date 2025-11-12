@@ -2,6 +2,20 @@
 
 Access your AI coding assistants from any device. Works with Claude Code, Aider, GitHub Copilot, and any terminal-based AI tool.
 
+## What's New in v1.3
+
+- ✨ **No Build Tools Required** - Prebuilt binaries for all platforms (Windows, macOS, Linux)
+- 🪟 **Improved Windows Support** - Fixed PATH issues, ConPTY flickering, and command execution
+- ⚡ **Fast Installation** - 10-30 seconds instead of minutes
+- 🔄 **Auto-Update Check** - CLI version validation on startup
+- 🎯 **Enhanced Terminal Handling** - Better resize management and output normalization
+
+**Previous versions:**
+- **v1.2** - Windows output deduplication and PowerShell optimization
+- **v1.0** - Stable release with session management and E2EE
+- **v0.9** - Terminal resize support and improved reconnection
+- **v0.8** - Demo mode for Apple App Review
+
 ## Features
 
 - 🚀 **Universal AI Tool Support** - Works with any terminal-based AI coding assistant
@@ -18,32 +32,19 @@ Access your AI coding assistants from any device. Works with Claude Code, Aider,
 
 ### Quick Install
 
-**macOS:**
+Termly CLI includes **prebuilt binaries** for all platforms - no compilation required!
+
+**All Platforms:**
 ```bash
 npm install -g @termly-dev/cli
 ```
-
-**Linux:**
-```bash
-# Install build tools first (required for node-pty compilation)
-# Amazon Linux / RHEL / CentOS / Fedora
-sudo yum install gcc-c++ make python3 -y
-
-# Ubuntu / Debian
-sudo apt-get update && sudo apt-get install -y build-essential python3
-
-# Then install CLI
-npm install -g @termly-dev/cli
-```
-
-**Windows:**
-```cmd
-npm install -g @termly-dev/cli
-```
-
-If installation fails, see [Windows requirements](#windows) below.
 
 After installation, the `termly` command is available globally.
+
+**That's it!** Works out-of-the-box on:
+- ✅ macOS (Intel & Apple Silicon)
+- ✅ Linux (x64 & ARM64)
+- ✅ Windows 10+ (x64 & ARM64)
 
 ### Development (Beta Testing)
 
@@ -57,104 +58,15 @@ This installs the `termly-dev` command which connects to the development environ
 
 ### System Requirements
 
-Termly CLI requires **build tools** for compiling native dependencies (`node-pty`):
+**Node.js 18+** - That's all you need!
 
-#### Linux
-Build tools are **required** for installation:
+Termly CLI uses **@lydell/node-pty** with prebuilt binaries for all platforms:
+- **No Visual Studio** required on Windows
+- **No Xcode CLI tools** required on macOS
+- **No build-essential** required on Linux
+- **Fast installation** (no compilation)
 
-**Amazon Linux 2023 / RHEL / CentOS / Fedora:**
-```bash
-sudo yum groupinstall "Development Tools" -y
-# Or minimal:
-sudo yum install gcc-c++ make python3 -y
-```
-
-**Ubuntu / Debian:**
-```bash
-sudo apt-get update
-sudo apt-get install -y build-essential python3
-```
-
-**Alpine Linux:**
-```bash
-apk add --no-cache make gcc g++ python3
-```
-
-#### Windows
-The installer **automatically checks** for required build tools before installation. If any components are missing, installation will be blocked with clear instructions.
-
-**Required components:**
-- Visual Studio 2022 (Community/Professional/Enterprise) OR Build Tools for Visual Studio 2022
-- MSVC C++ compiler (cl.exe)
-- MSVC Spectre-mitigated libraries
-- Windows SDK (10 or 11)
-- Python 3.x
-
-**The installer verifies all components and will show detailed error messages if anything is missing.**
-
-**Installation steps:**
-
-**Option 1 - Visual Studio 2022 Community (Recommended):**
-
-1. Download [Visual Studio 2022 Community](https://visualstudio.microsoft.com/downloads/) (free)
-2. Run installer and select workload: **Desktop development with C++**
-3. In **Individual Components** tab, ensure checked:
-   - ✅ MSVC v143 - VS 2022 C++ x64/x86 build tools
-   - ✅ **MSVC v143 - VS 2022 C++ x64/x86 Spectre-mitigated libs** (required!)
-   - ✅ **Windows 11 SDK** or Windows 10 SDK (required!)
-   - ✅ C++ CMake tools for Windows
-4. Install (requires ~7GB disk space)
-5. After installation: `npm install -g @termly-dev/cli`
-
-**Option 2 - Build Tools Only (Minimal):**
-
-1. Download [Build Tools for Visual Studio 2022](https://aka.ms/vs/17/release/vs_BuildTools.exe)
-2. Run installer and select: **Desktop development with C++**
-3. In **Individual Components** tab, ensure checked:
-   - ✅ MSVC v143 - VS 2022 C++ x64/x86 Spectre-mitigated libs
-   - ✅ **Windows 11 SDK** or Windows 10 SDK
-4. Install (~3GB disk space)
-5. Install Python: Download from [python.org](https://www.python.org/downloads/)
-6. After installation: `npm install -g @termly-dev/cli`
-
-**Common installation errors:**
-
-The installer will block and show specific instructions if components are missing:
-
-**"Missing: C++ build tools"**
-- Open Visual Studio Installer → Modify → Workloads tab
-- Check: "Desktop development with C++"
-
-**"Missing: Spectre-mitigated libraries"**
-- Open Visual Studio Installer → Modify → Individual Components tab
-- Search "Spectre" and check: "MSVC v143 - VS 2022 C++ x64/x86 Spectre-mitigated libs (Latest)"
-
-**"Missing: Windows SDK"**
-- Open Visual Studio Installer → Modify → Individual Components tab
-- Search "Windows SDK" and check: "Windows 11 SDK (10.0.22621.0)" or any available version
-
-After fixing missing components, retry: `npm install -g @termly-dev/cli`
-
-#### macOS
-Works out-of-the-box. Xcode Command Line Tools usually installed automatically.
-
-If needed:
-```bash
-xcode-select --install
-```
-
-### Platform-Specific Notes
-
-**ARM64 Linux (AWS Graviton, Raspberry Pi):**
-- Build tools are **mandatory** (no prebuilt binaries)
-- Compilation takes 2-5 minutes
-
-**Windows ARM64:**
-- May require Visual Studio with ARM64 build tools
-
-**Docker/Containers:**
-- Use base images with build tools pre-installed
-- Example: `node:18` (Debian-based) already includes build-essential
+Installation typically completes in **10-30 seconds**.
 
 ## Environments
 
@@ -225,7 +137,7 @@ termly list          # Quick list
 
 ## Supported AI Tools
 
-Termly CLI supports **17 interactive terminal-based AI coding assistants**:
+Termly CLI supports **20+ interactive terminal-based AI coding assistants**:
 
 ### Official Tools from Major Companies
 - **Claude Code** (Anthropic) - AI coding assistant
@@ -233,6 +145,9 @@ Termly CLI supports **17 interactive terminal-based AI coding assistants**:
 - **Cursor CLI** (Cursor) - AI coding assistant CLI
 - **Cody CLI** (Sourcegraph) - AI assistant (Beta)
 - **Amazon Q Developer** (AWS) - Free tier available
+- **Google Gemini CLI** (Google) - 1M token context window
+- **Grok CLI** (xAI) - X.AI's coding assistant
+- **OpenAI Codex CLI** (OpenAI) - Code generation model
 
 ### Popular Open-Source Tools
 - **Aider** - AI pair programming (35k+ stars)
@@ -245,12 +160,11 @@ Termly CLI supports **17 interactive terminal-based AI coding assistants**:
 - **Blackbox AI** - Debugging & file editing
 
 ### Experimental/Future Support
-- **OpenAI Codex CLI** - When released
-- **Google Gemini CLI** - When released
-- **Grok CLI** - When released
 - **OpenCode** - When released
+- **Devin CLI** - When released
+- **Any other terminal-based AI tool**
 
-**And more...** - Works with any terminal-based AI tool
+**And more...** - Works with any terminal-based AI tool that supports interactive TTY mode
 
 ## Commands
 
@@ -354,7 +268,6 @@ Remove stale sessions (processes that are no longer running).
 ## Requirements
 
 - **Node.js 18+**
-- **Build tools** (Linux: gcc/make, Windows: VS2022/Spectre libs, macOS: Xcode CLI)
 - **At least one AI coding assistant** installed (see Supported AI Tools section)
 - **Mobile app** (iOS/Android) - coming soon
 
@@ -362,53 +275,42 @@ Remove stale sessions (processes that are no longer running).
 
 ### Installation Issues
 
-**Automatic Build Tools Check**
+**Installation usually works flawlessly** thanks to prebuilt binaries.
 
-The installer automatically verifies build requirements on all platforms:
-- **Linux**: Checks for make, gcc/g++, python3
-- **Windows**: Checks for MSVC compiler, Spectre libs, Windows SDK, Python
-- **macOS**: Checks for Xcode Command Line Tools (warning only)
+If you encounter issues:
 
-If components are missing, installation will be **blocked** with detailed instructions.
+**"Cannot find module 'node-pty'"**
 
-**Linux: Installation blocked - missing build tools**
-
-The installer detected missing components. Install them:
+Reinstall the package:
 ```bash
-# Amazon Linux / RHEL / CentOS
-sudo yum install gcc-c++ make python3 -y
-
-# Ubuntu / Debian
-sudo apt-get install build-essential python3 -y
+npm uninstall -g @termly-dev/cli
+npm cache clean --force
+npm install -g @termly-dev/cli
 ```
 
-Then retry: `npm install -g @termly-dev/cli`
+**Permission errors on macOS/Linux**
 
-**Windows: Installation blocked - missing components**
+Use `sudo` or fix npm permissions:
+```bash
+# Option 1: Use sudo
+sudo npm install -g @termly-dev/cli
 
-The installer will show exactly what's missing and how to fix it.
+# Option 2: Fix npm permissions (recommended)
+mkdir ~/.npm-global
+npm config set prefix '~/.npm-global'
+echo 'export PATH=~/.npm-global/bin:$PATH' >> ~/.bashrc
+source ~/.bashrc
+npm install -g @termly-dev/cli
+```
 
-Common fixes:
-- **Missing C++ build tools**: Install "Desktop development with C++" workload
-- **Missing Spectre libraries**: Add "MSVC v143 Spectre-mitigated libs" in Individual Components
-- **Missing Windows SDK**: Add "Windows 11 SDK" in Individual Components
-- **Missing Python**: Download from [python.org](https://www.python.org/downloads/)
+**Windows: "EPERM: operation not permitted"**
 
-See detailed instructions in the error message or [Windows requirements](#windows) section.
-
-**Windows: "EPERM: operation not permitted" during cleanup**
-
-This is a warning, not an error. Installation likely succeeded. Verify:
+This is usually a warning, not a fatal error. Check if installation succeeded:
 ```cmd
 termly --version
 ```
 
-**macOS: "gyp: No Xcode or CLT version detected"**
-
-Install Xcode Command Line Tools:
-```bash
-xcode-select --install
-```
+If the command works, installation was successful.
 
 ### Usage Issues
 
@@ -451,6 +353,21 @@ For issues: https://github.com/termly-dev/termly-cli/issues
 - **Version enforcement** - Automatic check for minimum supported version
 - **Open source** - Audit the code yourself
 
+## Architecture
+
+Termly CLI uses a PTY (pseudo-terminal) to spawn AI tools locally and streams I/O through WebSocket with end-to-end encryption.
+
+```
+Mobile App <--[encrypted]--> WebSocket Server <--[encrypted]--> CLI <--[local]--> PTY <--> AI Tool
+```
+
+**Key features:**
+- **Circular buffer** - Stores last 100KB for session resume
+- **Platform-specific optimizations** - Windows output deduplication and escape sequence normalization
+- **Batch catchup** - Sends missed messages in 100-message batches with 10ms delay
+
+For detailed architecture diagrams and data flow, see [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+
 ## Development
 
 ```bash
@@ -468,6 +385,10 @@ TERMLY_ENV=local node bin/cli.js start
 
 # Debug mode
 DEBUG=1 node bin/cli.js start --debug
+
+# View logs
+tail -f ~/.termly/logs/cli.log  # macOS/Linux
+Get-Content $env:USERPROFILE\.termly\logs\cli.log -Wait -Tail 50  # Windows
 ```
 
 ## Publishing
@@ -475,29 +396,68 @@ DEBUG=1 node bin/cli.js start --debug
 ### Production Release
 
 ```bash
+# Update version in package.json and package.dev.json
+npm version patch  # or minor, or major
+
+# Publish production package
 npm publish
 ```
 
 ### Development Release
 
 ```bash
-# Temporarily swap package files
+# Use the publish script
+./scripts/publish-dev.sh
+
+# Or manually:
 cp package.dev.json package.json
 npm publish
 git checkout package.json
 ```
 
+## Contributing
+
+Contributions are welcome! Please:
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+**Before contributing:**
+- Read [CLAUDE.md](CLAUDE.md) for project structure and implementation details
+- Check [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for architecture overview
+- Run the CLI locally to test your changes
+
+## Documentation
+
+- **[CLAUDE.md](CLAUDE.md)** - Project overview and implementation guide for AI assistants
+- **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** - Detailed architecture with data flow diagrams
+- **[CRYPTO_SPEC.md](CRYPTO_SPEC.md)** - End-to-end encryption specification
+- **[COMMUNICATION_PROTOCOL.md](COMMUNICATION_PROTOCOL.md)** - WebSocket protocol documentation
+- **[WINDOWS_DEBUG.md](WINDOWS_DEBUG.md)** - Windows debugging instructions
+- **[MIGRATION_TO_ESM.md](MIGRATION_TO_ESM.md)** - Future ESM migration plan
+
 ## License
 
-MIT
+MIT - See [LICENSE](LICENSE) for details
+
+## Support
+
+- **Issues:** https://github.com/termly-dev/termly-cli/issues
+- **Discussions:** https://github.com/termly-dev/termly-cli/discussions
+- **Website:** https://termly.dev
+- **Documentation:** https://termly.dev/docs
 
 ## Links
 
-- Website: https://termly.dev
-- Development: https://dev.termly.dev
-- Documentation: https://termly.dev/docs
-- GitHub: https://github.com/termly-dev/termly-cli
-- Issues: https://github.com/termly-dev/termly-cli/issues
+- 🌐 Website: https://termly.dev
+- 🔧 Development: https://dev.termly.dev
+- 📚 Documentation: https://termly.dev/docs
+- 💻 GitHub: https://github.com/termly-dev/termly-cli
+- 🐛 Issues: https://github.com/termly-dev/termly-cli/issues
+- ☕ Support us: https://ko-fi.com/termly
 
 ---
 

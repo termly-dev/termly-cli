@@ -104,3 +104,7 @@ dist
 *.swp
 *.swo
 *~
+
+# AI Assistant settings (local only)
+.claude/
+.grok/

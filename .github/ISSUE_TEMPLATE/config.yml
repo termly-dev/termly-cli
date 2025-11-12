@@ -1,0 +1,11 @@
+blank_issues_enabled: true
+contact_links:
+  - name: 🔒 Security Vulnerability
+    url: https://github.com/termly-dev/termly-cli/security/advisories/new
+    about: Please report security vulnerabilities privately via GitHub Security Advisory
+  - name: 💬 Discussions
+    url: https://github.com/termly-dev/termly-cli/discussions
+    about: Ask questions and discuss ideas with the community
+  - name: 📚 Documentation
+    url: https://termly.dev/docs
+    about: Check out the documentation for guides and tutorials

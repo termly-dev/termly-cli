@@ -21,6 +21,10 @@ test/
 *.swp
 *.swo
 
+# AI Assistant settings
+.claude/
+.grok/
+
 # Temporary files
 tmp/
 temp/
