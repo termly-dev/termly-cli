@@ -35,7 +35,7 @@ When reporting a vulnerability, please include:
 - **Initial response:** Within 48 hours
 - **Status update:** Within 7 days
 - **Fix timeline:** Depends on severity
-  - Critical: 1-7 days
+  - Critical: 1-7 days (with forced update via version check)
   - High: 7-14 days
   - Medium: 14-30 days
   - Low: 30-90 days
@@ -47,20 +47,23 @@ When security issues are fixed:
 - Update the CHANGELOG
 - Credit the reporter (unless they prefer to remain anonymous)
 - Publish a security advisory on GitHub
+- **For critical issues:** Set minimum version on server to force all users to update
 
 ## Supported Versions
 
-We provide security updates for the following versions:
+**We only support the latest version.**
 
 | Version | Supported          |
 | ------- | ------------------ |
-| 1.3.x   | ✅ Yes             |
-| 1.2.x   | ✅ Yes             |
-| 1.1.x   | ⚠️ Security fixes only |
-| 1.0.x   | ⚠️ Security fixes only |
-| < 1.0   | ❌ No              |
+| Latest (1.3.x)   | ✅ Yes    |
+| Older versions   | ❌ No     |
 
-**Note:** We strongly recommend always using the latest version.
+**Important:** Termly CLI includes automatic version checking. If your version is outdated and has known security issues, the CLI will block startup and require you to update.
+
+To update to the latest version:
+```bash
+npm update -g @termly-dev/cli
+```
 
 ## Security Features
 

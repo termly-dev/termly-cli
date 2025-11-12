@@ -126,13 +126,17 @@ See git history for detailed changes in earlier versions.
 
 ## Version Support
 
+**We only support the latest version.** Termly CLI includes automatic version enforcement - outdated versions will be blocked from connecting if they have security issues.
+
 | Version | Status | Support |
 |---------|--------|---------|
-| 1.3.x   | ✅ Active | Full support |
-| 1.2.x   | ✅ Active | Full support |
-| 1.1.x   | ⚠️ Maintenance | Security fixes only |
-| 1.0.x   | ⚠️ Maintenance | Security fixes only |
-| < 1.0   | ❌ End of Life | No support |
+| Latest (1.3.x) | ✅ Supported | Full support |
+| Older versions | ❌ Unsupported | Update required |
+
+To update:
+```bash
+npm update -g @termly-dev/cli
+```
 
 ## Upgrade Guide
 
