@@ -117,11 +117,13 @@ Settings → Branches → Add rule (для `main`):
 1. **Default branch:** main ✅
 
 2. **Pull Requests:**
-   - [x] Allow merge commits
-   - [x] Allow squash merging
-   - [x] Allow rebase merging
+   - [x] Allow merge commits (рекомендуется)
+   - [x] Allow squash merging (рекомендуется для мелких PR)
+   - [x] Allow rebase merging (опционально)
    - [x] Always suggest updating pull request branches
    - [x] Automatically delete head branches
+
+   **Note:** Минимум одна опция должна быть включена. Если у вас "Require linear history" в branch protection, то нужно оставить только squash или rebase.
 
 3. **Archives:**
    - [ ] Do NOT include Git LFS objects in archives (экономит место)
