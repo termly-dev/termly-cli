@@ -16,7 +16,7 @@ Instead, please report security issues privately:
    - Provide detailed information about the vulnerability
 
 2. **Email:**
-   - Send to: security@termly.dev
+   - Send to: hello@termly.dev
    - Include "SECURITY" in the subject line
    - Provide detailed steps to reproduce the issue
 
@@ -150,7 +150,7 @@ For significant findings, we're happy to:
 
 ## Questions?
 
-For security questions or concerns, contact: security@termly.dev
+For security questions or concerns, contact: hello@termly.dev
 
 For general support: https://github.com/termly-dev/termly-cli/issues
 
