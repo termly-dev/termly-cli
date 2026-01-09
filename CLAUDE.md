@@ -194,6 +194,11 @@ The CLI uses **@lydell/node-pty** - a fork of the official node-pty that include
 - Exports: getServerUrl(), getApiUrl(), getEnvironmentName(), isLocal(), isDev(), isProduction()
 - Determines environment at runtime (cannot be changed by users)
 
+**Constants:** `lib/config/constants.js`
+- All magic numbers and configuration values must be defined here
+- Never hardcode numeric constants in other files
+- Import constants: `const { CONSTANT_NAME } = require('../config/constants');`
+
 **Sessions file:** `~/.termly/sessions.json`
 - Array of session objects
 - Auto-cleanup on `termly cleanup` command
@@ -295,6 +300,8 @@ Edit `lib/ai-tools/registry.js`:
 **PTY problems:** `lib/session/pty-manager.js` (spawning/IO) + `lib/session/buffer.js` (buffering)
 
 **Configuration changes:** `lib/config/manager.js` (schema must match conf requirements)
+
+**Adding/modifying constants:** `lib/config/constants.js` (all magic numbers go here)
 
 **Environment changes:** `lib/config/environment.js` (add new environments or modify URLs here)
 
