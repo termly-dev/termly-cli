@@ -194,6 +194,11 @@ The CLI uses **@lydell/node-pty** - a fork of the official node-pty that include
 - Exports: getServerUrl(), getApiUrl(), getEnvironmentName(), isLocal(), isDev(), isProduction()
 - Determines environment at runtime (cannot be changed by users)
 
+**Constants:** `lib/config/constants.js`
+- All magic numbers and configuration values must be defined here
+- Never hardcode numeric constants in other files
+- Import constants: `const { CONSTANT_NAME } = require('../config/constants');`
+
 **Sessions file:** `~/.termly/sessions.json`
 - Array of session objects
 - Auto-cleanup on `termly cleanup` command
@@ -229,13 +234,23 @@ Message types from mobile:
 - `catchup_request` → mobile rejoined (sends lastSeq to start catchup)
 - `input` → encrypted user input (decrypt → write to PTY)
 - `resize` → terminal resize {cols, rows}
-- `pong` → heartbeat response
+
+Message types to server:
+- `pong` → heartbeat response with CLI status: `{type: 'pong', timestamp, status: 'idle' | 'busy'}`
 
 Message types to mobile:
 - `output` → encrypted PTY output with seq number
 - `catchup_batch` → batch of missed messages during session resume (up to 100 messages per batch)
 - `ping` → heartbeat (every 30s)
 - `sync_complete` → catchup finished (all batches delivered)
+
+### CLI Status Tracking (for Push Notifications)
+CLI tracks its status (`idle` or `busy`) to enable server-side push notifications:
+- **busy**: PTY output received within last 15 seconds (AI tool is working)
+- **idle**: No PTY output for 15+ seconds (AI tool waiting for user input)
+- Status sent to server in every `pong` message
+- `lastOutputTime` updated on every PTY output (even if mobile disconnected)
+- Server uses status to decide when to send push notification to mobile
 
 ### Pairing Code Format
 - 6 chars: `[A-Z0-9]{6}` (e.g., ABC123)
@@ -295,6 +310,8 @@ Edit `lib/ai-tools/registry.js`:
 **PTY problems:** `lib/session/pty-manager.js` (spawning/IO) + `lib/session/buffer.js` (buffering)
 
 **Configuration changes:** `lib/config/manager.js` (schema must match conf requirements)
+
+**Adding/modifying constants:** `lib/config/constants.js` (all magic numbers go here)
 
 **Environment changes:** `lib/config/environment.js` (add new environments or modify URLs here)
 
