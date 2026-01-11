@@ -2,15 +2,13 @@
 
 Access your AI coding assistants from any device. Works with Claude Code, Aider, GitHub Copilot, and any terminal-based AI tool.
 
-## What's New in v1.3
+## What's New in v1.5
 
-- ✨ **No Build Tools Required** - Prebuilt binaries for all platforms (Windows, macOS, Linux)
-- 🪟 **Improved Windows Support** - Fixed PATH issues, ConPTY flickering, and command execution
-- ⚡ **Fast Installation** - 10-30 seconds instead of minutes
-- 🔄 **Auto-Update Check** - CLI version validation on startup
-- 🎯 **Enhanced Terminal Handling** - Better resize management and output normalization
+- 🔔 **Push Notifications Support** - CLI status tracking (idle/busy) for server-side push notifications
+- 🔗 **Improved Session Stability** - Keep session alive when WebSocket reconnection fails
 
 **Previous versions:**
+- **v1.3** - Prebuilt binaries, improved Windows support, fast installation
 - **v1.2** - Windows output deduplication and PowerShell optimization
 - **v1.0** - Stable release with session management and E2EE
 - **v0.9** - Terminal resize support and improved reconnection
