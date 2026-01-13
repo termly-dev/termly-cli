@@ -35,7 +35,7 @@ program
   .command('start [directory]', { isDefault: true })
   .description('Start AI tool with remote access')
   .option('--ai <tool>', 'Specify AI tool to use')
-  .option('--ai-args <args>', 'Additional arguments for AI tool')
+  .option('--ai-args <args>', 'Additional arguments for AI tool (e.g., "--continue" for Claude Code)')
   .option('--no-auto-detect', 'Disable AI tool auto-detection')
   .option('--debug', 'Enable debug logging')
   .action(async (directory, options) => {
