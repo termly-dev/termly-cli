@@ -204,6 +204,9 @@ termly start /path/to/project --ai "claude code"
 
 # Pass arguments to AI tool
 termly start --ai aider --ai-args "--model gpt-4"
+
+# Continue previous Claude Code session (restore context after restart)
+termly start --ai claude-code --ai-args "--continue"
 ```
 
 ### Status
