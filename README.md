@@ -2,17 +2,17 @@
 
 Access your AI coding assistants from any device. Works with Claude Code, Aider, GitHub Copilot, and any terminal-based AI tool.
 
-## What's New in v1.5
+## What's New in v1.7
 
-- 🔔 **Push Notifications Support** - CLI status tracking (idle/busy) for server-side push notifications
-- 🔗 **Improved Session Stability** - Keep session alive when WebSocket reconnection fails
+- 🖥️ **TUI Mode Support** - Full support for TUI apps like OpenCode (alternate screen buffer, mouse events)
+- 🎯 **OpenCode Integration** - Native support for OpenCode with internal scroll and mouse handling
+- 🔄 **Smarter Reconnection** - Skip useless catchup for TUI apps that redraw full screen
 
 **Previous versions:**
+- **v1.5** - Push notifications support, improved session stability
 - **v1.3** - Prebuilt binaries, improved Windows support, fast installation
 - **v1.2** - Windows output deduplication and PowerShell optimization
 - **v1.0** - Stable release with session management and E2EE
-- **v0.9** - Terminal resize support and improved reconnection
-- **v0.8** - Demo mode for Apple App Review
 
 ## Features
 
@@ -149,6 +149,7 @@ Termly CLI supports **20+ interactive terminal-based AI coding assistants**:
 
 ### Popular Open-Source Tools
 - **Aider** - AI pair programming (35k+ stars)
+- **OpenCode** - TUI-based AI coding agent with LSP integration (full TUI support!)
 - **Continue CLI** - Modular architecture
 - **OpenHands** - Open-source Devin alternative
 - **Mentat** - Git integration
@@ -158,7 +159,6 @@ Termly CLI supports **20+ interactive terminal-based AI coding assistants**:
 - **Blackbox AI** - Debugging & file editing
 
 ### Experimental/Future Support
-- **OpenCode** - When released
 - **Devin CLI** - When released
 - **Any other terminal-based AI tool**
 
