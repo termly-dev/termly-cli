@@ -136,6 +136,15 @@ The CLI uses **@lydell/node-pty** - a fork of the official node-pty that include
 - Each message has sequence number for catchup
 - Used for session resume when mobile reconnects
 - Buffer eviction: FIFO when size > maxSize
+- **TUI apps (OpenCode):** Buffer is skipped - they redraw full screen, catchup is useless
+
+**TUI Mode (`lib/session/pty-manager.js`):**
+- Enabled for apps in `tuiTools` array (currently: `['opencode']`)
+- `isTUIMode` flag set in constructor based on tool.key
+- TUI apps use alternate screen buffer, internal scroll, mouse events
+- Buffer writes skipped for TUI - no catchup on reconnect
+- Screen cleared on mobile connect/reconnect (only for TUI apps)
+- Mobile app determines TUI mode by AI tool name
 
 ### End-to-End Encryption
 
@@ -297,6 +306,13 @@ Edit `lib/ai-tools/registry.js`:
 }
 ```
 
+**Adding TUI tools (alternate screen buffer apps):**
+Edit `lib/session/pty-manager.js` and add to `tuiTools` array:
+```javascript
+this.tuiTools = ['opencode', 'your-new-tui-tool'];
+```
+TUI tools: skip buffer writes, clear screen on connect, mobile handles mouse events.
+
 ## Files to Check When...
 
 **Adding a new command:** `bin/cli.js` (register command) + `lib/commands/<name>.js` (implementation)
@@ -308,6 +324,8 @@ Edit `lib/ai-tools/registry.js`:
 **Debugging WebSocket issues:** `lib/network/websocket.js` (protocol) + `lib/network/reconnect.js` (backoff)
 
 **PTY problems:** `lib/session/pty-manager.js` (spawning/IO) + `lib/session/buffer.js` (buffering)
+
+**TUI mode issues:** `lib/session/pty-manager.js` (tuiTools array, isTUIMode flag, buffer skip)
 
 **Configuration changes:** `lib/config/manager.js` (schema must match conf requirements)
 
