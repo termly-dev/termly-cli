@@ -2,13 +2,15 @@
 
 Access your AI coding assistants from any device. Works with Claude Code, Aider, GitHub Copilot, and any terminal-based AI tool.
 
-## What's New in v1.7
+## What's New in v1.9
 
-- 🖥️ **TUI Mode Support** - Full support for TUI apps like OpenCode (alternate screen buffer, mouse events)
-- 🎯 **OpenCode Integration** - Native support for OpenCode with internal scroll and mouse handling
-- 🔄 **Smarter Reconnection** - Skip useless catchup for TUI apps that redraw full screen
+- 🎯 **Pi Coding Agent** - Support for minimal AI coding agent with extensions and 15+ LLM providers
+- 🚀 **Kilo Code CLI** - Full TUI support for agentic engineering CLI with 500+ models
+- 🖥️ **Enhanced TUI** - Improved TUI mode for Kilo Code with alternate screen buffer
 
 **Previous versions:**
+- **v1.8** - Added Pi Coding Agent and Kilo Code CLI support
+- **v1.7** - TUI mode support, OpenCode integration, smarter reconnection
 - **v1.5** - Push notifications support, improved session stability
 - **v1.3** - Prebuilt binaries, improved Windows support, fast installation
 - **v1.2** - Windows output deduplication and PowerShell optimization
@@ -135,7 +137,7 @@ termly list          # Quick list
 
 ## Supported AI Tools
 
-Termly CLI supports **20+ interactive terminal-based AI coding assistants**:
+Termly CLI supports **22+ interactive terminal-based AI coding assistants**:
 
 ### Official Tools from Major Companies
 - **Claude Code** (Anthropic) - AI coding assistant
@@ -150,6 +152,8 @@ Termly CLI supports **20+ interactive terminal-based AI coding assistants**:
 ### Popular Open-Source Tools
 - **Aider** - AI pair programming (35k+ stars)
 - **OpenCode** - TUI-based AI coding agent with LSP integration (full TUI support!)
+- **Kilo Code CLI** - Agentic engineering CLI with 500+ models and parallel mode (full TUI support!)
+- **Pi Coding Agent** - Minimal AI agent with extensions, skills, and 15+ LLM providers
 - **Continue CLI** - Modular architecture
 - **OpenHands** - Open-source Devin alternative
 - **Mentat** - Git integration
