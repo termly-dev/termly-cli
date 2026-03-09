@@ -19,7 +19,7 @@ const program = new Command();
 // Configure program
 program
   .name('termly-dev')
-  .description('Mirror your AI coding sessions to mobile - control 17+ tools from your phone (Development)')
+  .description('Mirror your AI coding sessions to mobile - control your terminal AI tools from your phone (Development)')
   .version(packageJson.version, '-v, --version', 'Show version');
 
 // Setup command
@@ -100,6 +100,7 @@ program.on('--help', () => {
   console.log('Examples:');
   console.log('  $ termly-dev                                # Auto-detect AI tool');
   console.log('  $ termly-dev --ai aider                     # Use Aider');
+  console.log('  $ termly-dev --ai omp                       # Use Oh My Pi');
   console.log('  $ termly-dev --ai "claude code"             # Use Claude Code');
   console.log('  $ termly-dev start                          # Same as just "termly-dev"');
   console.log('  $ termly-dev tools list                     # List available tools');
@@ -124,10 +125,11 @@ program.on('--help', () => {
   console.log('Supported AI Tools:');
   console.log('  • Claude Code');
   console.log('  • Aider');
+  console.log('  • OpenCode');
+  console.log('  • Oh My Pi');
+  console.log('  • Pi Coding Agent');
+  console.log('  • Kilo Code CLI');
   console.log('  • GitHub Copilot CLI');
-  console.log('  • Cursor');
-  console.log('  • Continue');
-  console.log('  • Cody');
   console.log('  • And more...');
   console.log('');
   console.log('About Termly:');

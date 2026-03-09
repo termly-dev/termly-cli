@@ -4,9 +4,9 @@ Access your AI coding assistants from any device. Works with Claude Code, Aider,
 
 ## What's New in v1.9
 
-- 🎯 **Pi Coding Agent** - Support for minimal AI coding agent with extensions and 15+ LLM providers
+- 🎯 **Oh My Pi** - Support for modern AI coding agent with skills, extensions, and terminal-first workflows
 - 🚀 **Kilo Code CLI** - Full TUI support for agentic engineering CLI with 500+ models
-- 🖥️ **Enhanced TUI** - Improved TUI mode for Kilo Code with alternate screen buffer
+- 🖥️ **Enhanced TUI** - Improved TUI mode for Kilo Code and Oh My Pi with alternate screen buffer
 
 **Previous versions:**
 - **v1.8** - Added Pi Coding Agent and Kilo Code CLI support
@@ -137,7 +137,7 @@ termly list          # Quick list
 
 ## Supported AI Tools
 
-Termly CLI supports **22+ interactive terminal-based AI coding assistants**:
+Termly CLI supports **20+ interactive terminal-based AI coding assistants**:
 
 ### Official Tools from Major Companies
 - **Claude Code** (Anthropic) - AI coding assistant
@@ -152,6 +152,7 @@ Termly CLI supports **22+ interactive terminal-based AI coding assistants**:
 ### Popular Open-Source Tools
 - **Aider** - AI pair programming (35k+ stars)
 - **OpenCode** - TUI-based AI coding agent with LSP integration (full TUI support!)
+- **Oh My Pi** - Modern AI coding agent with skills, extensions, and terminal-first workflows (full TUI support!)
 - **Kilo Code CLI** - Agentic engineering CLI with 500+ models and parallel mode (full TUI support!)
 - **Pi Coding Agent** - Minimal AI agent with extensions, skills, and 15+ LLM providers
 - **Continue CLI** - Modular architecture
@@ -202,6 +203,9 @@ termly start
 
 # Use Aider explicitly
 termly start --ai aider
+
+# Use Oh My Pi explicitly
+termly start --ai omp
 
 # Use Claude Code with custom directory
 termly start /path/to/project --ai "claude code"
@@ -328,6 +332,7 @@ termly tools list  # Check what's installed
 Install an AI tool:
 - Claude Code: https://docs.claude.com
 - Aider: `pip install aider-chat`
+- Oh My Pi: `bun install -g @oh-my-pi/pi-coding-agent`
 - GitHub Copilot: `gh extension install github/gh-copilot`
 
 **Session already running?**
