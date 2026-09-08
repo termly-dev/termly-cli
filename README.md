@@ -262,6 +262,10 @@ termly config set defaultAI aider
 termly config get defaultAI
 ```
 
+`defaultAI` is used by `termly start` when no `--ai` flag is given. If the
+configured tool is unknown or not installed, Termly warns and falls back to
+auto-detection instead of failing.
+
 **Note:** Server URL is determined by environment and cannot be changed via config.
 
 ### Cleanup
