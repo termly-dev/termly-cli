@@ -1,338 +1,52 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Termly CLI: npm utility that spawns AI coding tools (Claude Code, Aider, Codex, Gemini, ... see `lib/ai-tools/registry.js`) in a PTY and streams terminal I/O over WebSocket, end-to-end encrypted, to a mobile app. Each CLI session supports exactly ONE mobile device. CommonJS, Node 18+.
 
-## Project Overview
+## Environments
+Server URLs are hardcoded per environment (`lib/config/environment.js`) and users cannot change them.
+- Production (`@termly-dev/cli`, `termly`, `bin/cli.js`): `wss://api.termly.dev`
+- Development (`@termly-dev/cli-dev`, `termly-dev`, `bin/cli-dev.js`): `wss://dev-api.termly.dev`
+- Local: `TERMLY_ENV=local` (highest priority): `ws://localhost:3000`
 
-Termly CLI is a universal NPM utility that enables remote terminal access to AI coding assistants (Claude Code, Aider, GitHub Copilot, Gemini, Grok, Cody, and 10+ more) from mobile devices. It works by:
-
-1. Spawning AI tools in a PTY (pseudo-terminal) on the developer's computer
-2. Streaming terminal I/O through WebSocket to a server with end-to-end encryption
-3. Supporting session resume with circular buffering and sequence numbers
-4. Managing multiple independent sessions simultaneously
-
-**Key constraint:** Each CLI session supports exactly ONE mobile device connection.
-
-## Multi-Environment Architecture
-
-The CLI supports three environments with **hardcoded server URLs**:
-
-- **Production** (`@termly-dev/cli`): `termly` command → `wss://api.termly.dev`
-- **Development** (`@termly-dev/cli-dev`): `termly-dev` command → `wss://dev-api.termly.dev`
-- **Local**: `TERMLY_ENV=local` → `ws://localhost:3000`
-
-Environments are detected by:
-1. `TERMLY_ENV=local` environment variable (highest priority)
-2. Binary name (`cli-dev.js` = dev, `cli.js` = production)
-3. Default to production
-
-**Critical:** Users CANNOT change server URLs. They are immutable per environment.
-
-## Development Commands
-
+## Commands
 ```bash
-# Install dependencies
 npm install
-
-# Test production package
-node bin/cli.js [command]
-node bin/cli.js config  # Should show "Production" environment
-
-# Test development package
-node bin/cli-dev.js [command]
-node bin/cli-dev.js config  # Should show "Development" environment
-
-# Test local environment
-TERMLY_ENV=local node bin/cli.js config  # Should show "Local Development"
-
-# Link for global testing
-npm link  # Creates 'termly' command
-
-# Debug mode (enables verbose logging)
-DEBUG=1 node bin/cli.js start --debug
-node bin/cli.js start --debug
-
-# View logs
+node bin/cli.js config                 # shows active environment
+TERMLY_ENV=local node bin/cli.js start --debug
+DEBUG=1 node bin/cli.js start          # verbose console logging
 tail -f ~/.termly/logs/cli.log
-
-# Clean up test sessions
-rm -rf ~/.termly
+npm link                               # global `termly`
 ```
+No test suite (`npm test` is a stub).
 
-## Publishing
+Publish: `npm publish` for prod. Dev package: `scripts/publish-dev.sh` (swaps in `package.dev.json`; restore `package.json` afterwards). `package.json` and `package.dev.json` must stay in sync (dependencies, version).
 
-```bash
-# Publish production package
-npm publish
-
-# Publish development package
-cp package.dev.json package.json
-npm publish
-git checkout package.json  # Restore original
-```
-
-## Dependencies
-
-### node-pty (Prebuilt Binaries)
-
-The CLI uses **@lydell/node-pty** - a fork of the official node-pty that includes prebuilt binaries for all platforms. This eliminates the need for C++ build tools during installation.
-
-**Supported platforms (no compilation required):**
-- Windows 10+ (x64, ARM64) - uses ConPTY only
-- macOS (Intel x64, Apple Silicon ARM64)
-- Linux (x64, ARM64)
-
-**Note:** Windows 7/8 are NOT supported as this fork only supports ConPTY (available from Windows 10 build 17763+).
-
-**Package specification:**
-```json
-"node-pty": "npm:@lydell/node-pty@^1.1.0"
-```
-
-**Benefits:**
-- ✅ No Visual Studio required on Windows
-- ✅ No Xcode CLI tools required on macOS
-- ✅ No build-essential required on Linux
-- ✅ Fast installation (no compilation)
-- ✅ Consistent binaries across all platforms
-
-**Legacy note:** The `scripts/check-build-tools.js` file remains in the repository for historical reference but is no longer used in the installation process.
+## Gotchas
+- Pin `chalk` to v4 and `conf` to v10 (v5+/v11+ are ESM-only; this is CommonJS).
+- `node-pty` is `npm:@lydell/node-pty` (prebuilt binaries, ConPTY only, so Windows 10 build 17763+). `scripts/check-build-tools.js` is legacy and unused.
+- All numeric constants go in `lib/config/constants.js`; do not hardcode them elsewhere.
+- Logs never contain encryption keys, user input or encrypted content.
+- The PTY spawns the tool directly (no shell wrapper), `xterm-256color`.
 
 ## Architecture
+Start flow: `utils/version-checker.js` (blocks if CLI older than server minimum) -> `commands/start.js` (validate dir, one session per `workingDir`) -> `ai-tools/selector.js` / `detector.js` (`--ai <tool>`, `--no-auto-detect`, else detect via `command -v`) -> `crypto/dh.js` -> pairing code registered via `POST /api/pairing` -> `session/registry.js` (`~/.termly/sessions.json`; PIDs validated on load, dead ones become `stale`) -> `network/websocket.js` (`/ws/agent?code=...`, `?sessionId=...` on reconnect) -> `session/pty-manager.js`.
 
-### Core Data Flow
+Pairing code: 6 chars `[A-Z0-9]`, shown as `ABC-123`, sent without the dash.
 
-**Installation Flow:**
-1. User runs `npm install -g @termly-dev/cli` (or cli-dev)
-2. npm installs all dependencies including @lydell/node-pty
-3. @lydell/node-pty automatically selects the correct prebuilt binary for the platform (no compilation needed)
-4. Installation completes in seconds without requiring any build tools
+Encryption: DH group `modp14` (RFC 3526, 2048-bit) -> `HKDF-SHA256(secret, info="termly-session-key")` -> AES-256-GCM, random 12-byte IV, `{ciphertext: base64(data+authTag), iv}`. The info string must match the iOS app. Server cannot decrypt.
 
-**Start Command Flow:**
-1. `utils/version-checker.js` → checks CLI version against server minimum (blocks if outdated)
-2. `start.js` → validates directory, checks for existing session
-3. `ai-tools/selector.js` → auto-detects or selects AI tool
-4. `crypto/dh.js` → generates DH keypair for E2EE
-5. Generates pairing code (ABC123 format, displayed as ABC-123) + QR code
-6. `session/registry.js` → registers session to `~/.termly/sessions.json`
-7. `network/websocket.js` → connects to `wss://api.termly.dev/ws/agent?code=ABC123`
-8. On pairing complete: computes shared secret → derives AES-256 key → generates fingerprint
-9. `session/pty-manager.js` → spawns AI tool via node-pty
-10. Bidirectional streaming begins:
-   - PTY output → CircularBuffer → encrypt → WebSocket → mobile
-   - Mobile input → WebSocket → decrypt → PTY
+Reconnect: WebSocket backoff is 0s, 2s, 4s, then 8s for the rest, max 10 attempts (`network/reconnect.js`); the PTY keeps running. Heartbeat timeout 13s (server pings roughly every 5s); CLI replies `pong` with `status: idle|busy` (busy = PTY output within 15s, drives push notifications).
 
-### Session State Management
+Session resume: `CircularBuffer` keeps the last 100KB of output with sequence numbers. Mobile sends `catchup_request {lastSeq}`; CLI replies with `catchup_batch` messages of up to 100 (10ms apart), then `sync_complete`.
 
-**Sessions Registry (`~/.termly/sessions.json`):**
-- Stores all session metadata (sessionId, PID, workingDir, aiTool, fingerprint, mobileConnected, etc.)
-- Status values: `running`, `stopped`, `stale`
-- Auto-validates PIDs on load (marks dead processes as `stale`)
-- Prevents duplicate sessions per directory
-- Fingerprint stored after encryption established for verification
+TUI mode: tools in `this.tuiTools` in `lib/session/pty-manager.js` (currently `opencode`, `kilo`) skip buffer writes (no catchup) and clear the screen on mobile connect.
 
-**Circular Buffer:**
-- Stores last 100KB of PTY output in memory
-- Each message has sequence number for catchup
-- Used for session resume when mobile reconnects
-- Buffer eviction: FIFO when size > maxSize
-- **TUI apps (OpenCode):** Buffer is skipped - they redraw full screen, catchup is useless
+Message types: from mobile `pairing_complete`, `client_connected`, `client_disconnected`, `catchup_request`, `input`, `resize`; to mobile `output`, `catchup_batch`, `ping`, `sync_complete`; to server `pong`.
 
-**TUI Mode (`lib/session/pty-manager.js`):**
-- Enabled for apps in `tuiTools` array (currently: `['opencode']`)
-- `isTUIMode` flag set in constructor based on tool.key
-- TUI apps use alternate screen buffer, internal scroll, mouse events
-- Buffer writes skipped for TUI - no catchup on reconnect
-- Screen cleared on mobile connect/reconnect (only for TUI apps)
-- Mobile app determines TUI mode by AI tool name
+Stop: SIGTERM, then SIGKILL after 5s.
 
-### End-to-End Encryption
-
-**Key Exchange:**
-1. CLI generates DH-2048 keypair, sends public key to server
-2. Mobile generates DH keypair, sends public key via server
-3. Both sides compute shared secret: `DH(myPrivate, theirPublic)`
-4. Derive AES-256 key: `HKDF-SHA256(sharedSecret, "termly-session-key")`
-
-**Encryption:**
-- Algorithm: AES-256-GCM (authenticated encryption)
-- Each message encrypted with random 12-byte IV
-- Format: `{ciphertext: base64(data + authTag), iv: base64}`
-- Server cannot decrypt (zero-knowledge)
-
-### Reconnection Logic
-
-**WebSocket Reconnection:**
-- Exponential backoff: 0s, 2s, 4s, 8s, then 16s (max 10 attempts)
-- Managed by `network/reconnect.js`
-- PTY continues running locally during reconnect
-
-**Mobile Reconnection (Session Resume):**
-1. Mobile sends `catchup_request` with `lastSeq` number
-2. CLI retrieves `buffer.getAfter(lastSeq)` to get missed messages
-3. Messages are split into batches of 100 and sent as `catchup_batch` messages
-4. Each batch contains array of encrypted messages with original sequence numbers
-5. 10ms delay between batches to prevent flooding
-6. Sends `sync_complete` when all batches delivered
-
-### AI Tool Detection
-
-**Registry (`lib/ai-tools/registry.js`):**
-- Defines all supported tools with `command`, `args`, `checkInstalled()`
-- Tools: claude-code, aider, codex, github-copilot, gemini, grok, and 10+ more (see lib/ai-tools/registry.js)
-
-**Auto-Detection (`lib/ai-tools/detector.js`):**
-- Runs `command -v <tool>` for each registered tool
-- Attempts version detection via `--version` or `-v`
-- If multiple found: prompts user with inquirer
-- If one found: auto-selects
-- If none found: shows installation instructions
-
-**Selection Logic:**
-- `--ai <tool>` flag: manual selection (validates installed)
-- `--no-auto-detect`: requires manual selection
-- Default: auto-detect mode
-
-## Configuration & Storage
-
-**Config file:** `~/.termly/config.json` (managed by `conf` library v10.2.0)
-- Schema: defaultAI, version, lastUpdated (serverUrl removed - now hardcoded per environment)
-- Important: Use conf v10.x (v11+ is ESM-only, incompatible with CommonJS)
-
-**Environment detection:** `lib/config/environment.js`
-- Exports: getServerUrl(), getApiUrl(), getEnvironmentName(), isLocal(), isDev(), isProduction()
-- Determines environment at runtime (cannot be changed by users)
-
-**Constants:** `lib/config/constants.js`
-- All magic numbers and configuration values must be defined here
-- Never hardcode numeric constants in other files
-- Import constants: `const { CONSTANT_NAME } = require('../config/constants');`
-
-**Sessions file:** `~/.termly/sessions.json`
-- Array of session objects
-- Auto-cleanup on `termly cleanup` command
-
-**Logs:** `~/.termly/logs/cli.log`
-- Never logs: encryption keys, user input, encrypted content
-- Logs: connections, errors, session lifecycle, debug info
-- Debug mode (`DEBUG=1` or `--debug` flag):
-  - Shows verbose logging on console (WebSocket messages, catchup details, connection events)
-  - `logger.debug()` - only shown in debug mode
-  - `logger.debugInfo()` - written to file always, console only in debug mode
-  - Mobile connect/disconnect messages hidden by default, shown only in debug mode
-
-## Important Implementation Notes
-
-### PTY Management
-- PTY spawns AI tool command directly (not through shell wrapper)
-- Uses xterm-256color terminal type
-- Handles both local echo and remote transmission
-- Terminal resize events forwarded from mobile via WebSocket
-
-### Session Isolation
-- Each session = independent process with own PID
-- Sessions tracked by `workingDir` to prevent duplicates
-- Kill signals: SIGTERM (5s timeout) → SIGKILL (force)
-- Cleanup handlers on SIGINT/SIGTERM/process.exit
-
-### WebSocket Protocol
-Message types from mobile:
-- `pairing_complete` → contains mobile's DH public key
-- `client_connected` → mobile joined
-- `client_disconnected` → mobile left
-- `catchup_request` → mobile rejoined (sends lastSeq to start catchup)
-- `input` → encrypted user input (decrypt → write to PTY)
-- `resize` → terminal resize {cols, rows}
-
-Message types to server:
-- `pong` → heartbeat response with CLI status: `{type: 'pong', timestamp, status: 'idle' | 'busy'}`
-
-Message types to mobile:
-- `output` → encrypted PTY output with seq number
-- `catchup_batch` → batch of missed messages during session resume (up to 100 messages per batch)
-- `ping` → heartbeat (every 30s)
-- `sync_complete` → catchup finished (all batches delivered)
-
-### CLI Status Tracking (for Push Notifications)
-CLI tracks its status (`idle` or `busy`) to enable server-side push notifications:
-- **busy**: PTY output received within last 15 seconds (AI tool is working)
-- **idle**: No PTY output for 15+ seconds (AI tool waiting for user input)
-- Status sent to server in every `pong` message
-- `lastOutputTime` updated on every PTY output (even if mobile disconnected)
-- Server uses status to decide when to send push notification to mobile
-
-### Pairing Code Format
-- 6 chars: `[A-Z0-9]{6}` (e.g., ABC123)
-- Generated randomly without dash
-- Displayed with dash for readability: ABC-123 (formatting only)
-- Included in QR code JSON: `{type, code, serverUrl, aiTool, projectName}`
-- Sent to server at `/api/pairing` endpoint
-
-### Error Handling Patterns
-- **Outdated CLI version:** Block start with update command from server
-- **AI tool not found:** Show installation instructions specific to tool
-- **Session exists in dir:** Show session info + suggest `termly stop`
-- **Network error:** Auto-reconnect with backoff (version check skipped on network error)
-- **PTY crash:** Log exit code, update session status
-- **Stale sessions:** Detected by PID check, removable via `cleanup`
-
-## Special Considerations
-
-**Chalk version:** Must use v4.x (v5+ is ESM-only)
-**Conf version:** Must use v10.x (v11+ is ESM-only)
-**Node version:** Requires 18+ (uses crypto.hkdfSync, native ESM support)
-
-**node-pty (via @lydell/node-pty):**
-- Uses prebuilt binaries for all platforms (Windows, macOS, Linux - both x64 and ARM64)
-- No C++ build tools required for installation
-- Windows: Requires Windows 10 build 17763+ (ConPTY only, WinPTY removed)
-- Cannot be replaced - PTY is essential for interactive AI tool terminal emulation
-- API compatible with official node-pty 1.1.0
-
-**Testing without server:**
-The implementation includes WebSocket client code but the actual server (api.termly.dev) is not implemented. For testing, the `start` command will generate pairing code and QR but won't complete the WebSocket handshake.
-
-**Adding new AI tools:**
-Edit `lib/ai-tools/registry.js`:
-```javascript
-'tool-name': {
-  key: 'tool-name',
-  command: 'command-to-run',
-  args: ['default', 'args'],
-  displayName: 'Tool Display Name',
-  description: 'Description',
-  website: 'https://tool.website',
-  checkInstalled: async () => await commandExists('command-to-run')
-}
-```
-
-**Adding TUI tools (alternate screen buffer apps):**
-Edit `lib/session/pty-manager.js` and add to `tuiTools` array:
-```javascript
-this.tuiTools = ['opencode', 'your-new-tui-tool'];
-```
-TUI tools: skip buffer writes, clear screen on connect, mobile handles mouse events.
-
-## Files to Check When...
-
-**Adding a new command:** `bin/cli.js` (register command) + `lib/commands/<name>.js` (implementation)
-
-**Modifying encryption:** `lib/crypto/dh.js` (key exchange) + `lib/crypto/aes.js` (encryption)
-
-**Changing session logic:** `lib/session/registry.js` (persistence) + `lib/session/state.js` (runtime state)
-
-**Debugging WebSocket issues:** `lib/network/websocket.js` (protocol) + `lib/network/reconnect.js` (backoff)
-
-**PTY problems:** `lib/session/pty-manager.js` (spawning/IO) + `lib/session/buffer.js` (buffering)
-
-**TUI mode issues:** `lib/session/pty-manager.js` (tuiTools array, isTUIMode flag, buffer skip)
-
-**Configuration changes:** `lib/config/manager.js` (schema must match conf requirements)
-
-**Adding/modifying constants:** `lib/config/constants.js` (all magic numbers go here)
-
-**Environment changes:** `lib/config/environment.js` (add new environments or modify URLs here)
-
-**Version checking:** `lib/utils/version-checker.js` (CLI version validation logic)
-
-**New environment setup:** Edit `lib/config/environment.js` ENVIRONMENTS object, then create corresponding package file (e.g., `package.staging.json`) and binary (`bin/cli-staging.js`)
+## Where to change things
+- New command: register in `bin/cli.js`, implement in `lib/commands/<name>.js`
+- New AI tool: add an entry (`key`, `command`, `args`, `displayName`, `description`, `website`, `checkInstalled`) to `lib/ai-tools/registry.js`
+- New environment: edit `ENVIRONMENTS` in `lib/config/environment.js`, add `package.<env>.json` and `bin/cli-<env>.js`
+- Config schema: `lib/config/manager.js` (`~/.termly/config.json`: defaultAI, version, lastUpdated)
